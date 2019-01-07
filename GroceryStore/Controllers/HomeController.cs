@@ -20,7 +20,7 @@ namespace GroceryStore.Controllers
 
         public async Task<IActionResult> Index()
         {
-            List<Grocery> groceries = await _context.Grocery.Include(c => c.Conversion).ToListAsync();
+            List<Grocery> groceries = await _context.Grocery.Include(g => g.Conversion).ToListAsync();
 
             return View(groceries);
         }
@@ -29,9 +29,9 @@ namespace GroceryStore.Controllers
         {
             try
             {
-                List<Stock> stock = await _context.Stock.Include(l => l.Location).Where(s => s.GroceryId == id).ToListAsync();
+                List<Stock> stock = await _context.Stock.Include(s => s.Location).Include(s => s.Location.ProvinceState).Where(s => s.GroceryId == id).ToListAsync();
                 Grocery grocery = await _context.Grocery.FirstOrDefaultAsync(g => g.GroceryId == id);
-                ViewData["Title"] = $"Stock for {grocery.Name}";
+                ViewData["Subtitle"] = grocery.Name;
 
                 return View(stock);
             }
