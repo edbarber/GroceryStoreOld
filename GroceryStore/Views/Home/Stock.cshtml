@@ -1,0 +1,31 @@
+﻿@model IEnumerable<GroceryStore.Models.Stock>
+
+<h2>@ViewData["Title"]</h2>
+
+<p>
+    <a asp-action="Index" asp-controller="Home">Return to Groceries</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Location.Address)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quantity)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

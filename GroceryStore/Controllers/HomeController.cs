@@ -20,8 +20,25 @@ namespace GroceryStore.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var groceryStoreContext = _context.Grocery.Include(g => g.Conversion);
-            return View(await groceryStoreContext.ToListAsync());
+            List<Grocery> groceries = await _context.Grocery.Include(c => c.Conversion).ToListAsync();
+
+            return View(groceries);
+        }
+
+        public async Task<IActionResult> Stock(int id)
+        {
+            try
+            {
+                List<Stock> stock = await _context.Stock.Include(l => l.Location).Where(s => s.GroceryId == id).ToListAsync();
+                Grocery grocery = await _context.Grocery.FirstOrDefaultAsync(g => g.GroceryId == id);
+                ViewData["Title"] = $"Stock for {grocery.Name}";
+
+                return View(stock);
+            }
+            catch
+            {
+                return RedirectToAction("Index", "Error");
+            }
         }
 
         public IActionResult About()
