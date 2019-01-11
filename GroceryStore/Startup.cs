@@ -13,6 +13,7 @@ using GroceryStore.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GroceryStore.Models;
+using Newtonsoft.Json;
 
 namespace GroceryStore
 {
@@ -44,7 +45,9 @@ namespace GroceryStore
             services.AddDbContext<GroceryStoreContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("GroceryStoreConnection")));
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

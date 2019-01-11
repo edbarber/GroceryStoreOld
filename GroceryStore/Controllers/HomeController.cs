@@ -18,10 +18,24 @@ namespace GroceryStore.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var groceryStoreContext = _context.Grocery.Include(g => g.Conversion);
-            return View(await groceryStoreContext.ToListAsync());
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Search(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                var groceryStoreContext = _context.Grocery.Include(g => g.Conversion);
+                return Json(await groceryStoreContext.ToListAsync());
+            }
+            else
+            {
+                var groceryStoreContext = _context.Grocery.Include(g => g.Conversion).Where(g => g.Name.Contains(value, StringComparison.CurrentCultureIgnoreCase));
+                return Json(await groceryStoreContext.ToListAsync());
+            }
         }
 
         public async Task<IActionResult> Stock(int groceryId)

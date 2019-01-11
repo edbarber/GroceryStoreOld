@@ -5,37 +5,75 @@
 }
 
 <h2>Groceries</h2>
-
-@foreach (var item in Model)
-{
-    <div class="col-md-4">
-        <div class="thumbnail">
-            <a asp-controller="Home" asp-action="Stock" asp-route-id="@item.GroceryId">
-                @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
-                {
-                    <img src="@item.ImageUrl" alt="@item.ImageAlt" class="thumbnail-size" />
-                }
-                else
-                {
-                    <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" class="thumbnail-size" />
-                }
-            </a>
-            <div class="caption">
-                <h3>@item.Name</h3>
-                @{
-                    string weight = item.Weight != null ? $"{string.Format("{0:G29}", item.Weight)} {item.Conversion.Code}" : string.Empty;
-                }
-                <a asp-controller="Home" asp-action="Stock" asp-route-groceryid="@item.GroceryId" class="btn btn-primary" style="width:30%;">Stock</a>
-                <p class="font-weight-bold">@string.Format("{0:C}", item.Price) per @weight</p>
-                @if (!string.IsNullOrWhiteSpace(item.Description))
-                {
-                    <p>@item.Description</p>
-                }
-                else
-                {
-                    <p>N/A</p>
-                }
-            </div>
+<div class="row">
+    <div class="col-md-4 form-group form-inline pull-right visible-lg visible-md">
+        <div class="pull-right">
+            <label for="search1">Search</label>
+            <input type="text" class="form-control" id="search1" onkeyup="search(value)" />
         </div>
     </div>
-}
+    <div class="col-md-4 form-group visible-sm visible-xs">
+        <label for="search2">Search</label>
+        <input type="text" class="form-control" id="search2" onkeyup="search(value)" />
+    </div>
+</div>
+<div class="row" id="groceries"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        search($("#search").val());
+    });
+
+    function search(term) {
+        $.post("@Url.Action("Search", "Home")", {
+            value: term
+        }, function (data) {
+            var groceries = $("#groceries");
+
+            groceries.empty();
+
+            if (data.length == 0) {
+                var currChild = $("<div>").appendTo(groceries).addClass("col-md-4");
+                $("<p>").appendTo(currChild).text("No results found.");
+            }
+            else {
+                for (var i = 0; i < data.length; i++) {
+                    var currChild = $("<div>").appendTo(groceries).addClass("col-md-4");
+                    currChild = $("<div>").appendTo(currChild).addClass("thumbnail");
+                    currChild = $("<a>").appendTo(currChild).attr("href", "/Home/Stock?groceryId=" + data[i].groceryId);
+
+                    if (data[i].imageUrl == null || data[i].imageUrl == "") {
+                        $("<img>").appendTo(currChild).attr("src", "/images/imagenotavailable1-39de324.png").attr("alt", "Missing image").addClass("thumbnail-size");
+                    }
+                    else {
+                        $("<img>").appendTo(currChild).attr("src", data[i].imageUrl).attr("alt", data[i].imageAlt).addClass("thumbnail-size");
+                    }
+
+                    currChild = $("#groceries").children()[i].children[0];
+                    currChild = $("<div>").appendTo(currChild).addClass("caption");
+
+                    $("<h3>").appendTo(currChild).text(data[i].name);
+                    $("<a>").appendTo(currChild).attr("href", "/Home/Stock?groceryId=" + data[i].groceryId).addClass("btn btn-primary").attr("style", "width:100px;").text("Stock");
+
+                    var weight;
+
+                    if (data[i].weight == null) {
+                        weight = "";
+                    }
+                    else {
+                        weight = data[i].weight;
+                    }
+
+                    $("<p>").appendTo(currChild).addClass("font-weight-bold").text(currencyFormatter.format(data[i].price) + " per " + weight + " " + data[i].conversion.code);
+
+                    if (data[i].description != null && data[i].description != "") {
+                        $("<p>").appendTo(currChild).text(data[i].description);
+                    }
+                    else {
+                        $("<p>").appendTo(currChild).text("N/A");
+                    }
+                }
+            }
+        });
+    }
+</script>
