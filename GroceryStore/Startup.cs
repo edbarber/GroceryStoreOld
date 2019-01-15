@@ -49,9 +49,13 @@ namespace GroceryStore
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // Use add identity instead and added add default ui with add default token providers due to bug in 
+            // asp.net core 2.1 with checking what role current logged in user belongs to
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultUI()
+                .AddDefaultTokenProviders();
 
             services.AddDbContext<GroceryStoreContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("GroceryStoreConnection")));
