@@ -19,11 +19,11 @@ namespace GroceryStore.Data
                 await roleManager.CreateAsync(new IdentityRole("Admin"));
             }
 
-            if (await userManager.FindByNameAsync("admin@grocerystore.com") == null)
+            if (await userManager.FindByNameAsync("admin") == null)
             {
                 var user = new IdentityUser
                 {
-                    UserName = "admin@grocerystore.com",
+                    UserName = "admin",
                     Email = "admin@grocerystore.com",
                     PhoneNumber = "(905) 123-4567"
                 };
