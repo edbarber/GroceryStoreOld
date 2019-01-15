@@ -89,7 +89,7 @@ namespace GroceryStore
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            AdminData.Initialize(context, userManager, roleManager).Wait();
+            AdminData.Initialize(context, userManager, roleManager, Configuration).Wait();
         }
     }
 }
