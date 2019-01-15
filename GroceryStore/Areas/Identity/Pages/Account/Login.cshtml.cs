@@ -37,8 +37,8 @@ namespace GroceryStore.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
-            [EmailAddress]
-            public string Email { get; set; }
+            [Display(Name = "Username or email address")]
+            public string UserName { get; set; }
 
             [Required]
             [DataType(DataType.Password)]
@@ -73,7 +73,12 @@ namespace GroceryStore.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+                var user = await _signInManager.UserManager.FindByEmailAsync(Input.UserName);
+
+                if (user == null)
+                {
+                    user = await _signInManager.UserManager.FindByNameAsync(Input.UserName);
+                }
 
                 if (user == null)
                 {
