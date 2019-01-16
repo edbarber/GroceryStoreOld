@@ -51,7 +51,7 @@
                     currChild = $("<div>").appendTo(currChild).addClass("caption");
 
                     $("<h3>").appendTo(currChild).text(data[i].name);
-                    $("<a>").appendTo(currChild).attr("href", "/Home/Stock?groceryId=" + data[i].groceryId).addClass("btn btn-primary").attr("style", "width:100px;").text("Stock");
+                    $("<a>").appendTo(currChild).attr("href", "/Home/Stock/" + data[i].groceryId).addClass("btn btn-primary").attr("style", "width:100px;").text("Stock");
 
                     var weight;
 

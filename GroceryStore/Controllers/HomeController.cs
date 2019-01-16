@@ -38,12 +38,12 @@ namespace GroceryStore.Controllers
             }
         }
 
-        public async Task<IActionResult> Stock(int groceryId)
+        public async Task<IActionResult> Stock(int id)
         {
             try
             {
-                var stock = _context.Stock.Include(s => s.Location).Include(s => s.Location.ProvinceState).Where(s => s.GroceryId == groceryId);
-                var grocery = await _context.Grocery.FirstOrDefaultAsync(g => g.GroceryId == groceryId);
+                var stock = _context.Stock.Include(s => s.Location).Include(s => s.Location.ProvinceState).Where(s => s.GroceryId == id);
+                var grocery = await _context.Grocery.FirstOrDefaultAsync(g => g.GroceryId == id);
                 ViewData["Subtitle"] = grocery.Name;
 
                 return View(await stock.ToListAsync());
