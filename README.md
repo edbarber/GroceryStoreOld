@@ -13,4 +13,4 @@ Add-Migration ExtendedUserRole -Context ApplicationDbContext
 
 Update-Database -Context ApplicationDbContext
 
-Since the database that holds user accounts is seperate from the grocery store database, the server will check if it exists and create it if it doesn't. If also the accounts database schema is changed then you may have to drop the account database and let the server recreate it.
+Since the database that holds user accounts is seperate from the grocery store database, the server will check if it exists and create it if it doesn't. Also, if the accounts database schema is changed then you may have to drop the account database and let the server recreate it.
