@@ -36,11 +36,26 @@ namespace GroceryStore
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.Configure<IdentityOptions>(options =>
+            {
+                // Password options for each user
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+
+                // User options for each user
+                options.User.RequireUniqueEmail = true;
+            });
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // Use add identity instead and added add default ui with add default token providers due to bug in 
+            // asp.net core 2.1 with checking what role current logged in user belongs to
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultUI()
+                .AddDefaultTokenProviders();
 
             services.AddDbContext<GroceryStoreContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("GroceryStoreConnection")));
@@ -51,7 +66,8 @@ namespace GroceryStore
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext context,
+            RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
         {
             if (env.IsDevelopment())
             {
@@ -76,6 +92,8 @@ namespace GroceryStore
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            AdminData.Initialize(context, userManager, roleManager, Configuration).Wait();
         }
     }
 }
