@@ -1,6 +1,6 @@
 # GroceryStore
 
-To use this project you need to have the database created by executing CreateGroceryStoreDb. Make sure the connection string for GroceryStoreConnection int appsettings.json matches the database that was just created locally. 
+To use this project you need to have the database created by executing CreateGroceryStoreDb. Make sure the connection string for GroceryStoreConnection in appsettings.json matches the database that was just created locally. 
 
 The models for the GroceryStore database are generated using the scaffolding command referenced here 
 https://docs.microsoft.com/en-us/ef/core/miscellaneous/cli/powershell
