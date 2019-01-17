@@ -48,11 +48,11 @@ namespace GroceryStore
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("AccountConnection")));
 
             // Use add identity instead and added add default ui with add default token providers due to bug in 
             // asp.net core 2.1 with checking what role current logged in user belongs to
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
@@ -67,7 +67,7 @@ namespace GroceryStore
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext context,
-            RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
+            RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager)
         {
             if (env.IsDevelopment())
             {
