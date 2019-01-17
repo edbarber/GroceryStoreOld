@@ -13,4 +13,8 @@
     }
     <li class="@ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)"><a asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
     <li class="@ManageNavPages.PersonalDataNavClass(ViewContext)"><a asp-page="./PersonalData">Personal data</a></li>
+    @if (User.IsInRole("Admin"))
+    {
+        <li class="@ManageNavPages.AccountsNavClass(ViewContext)"><a asp-page="./Accounts">Accounts</a></li>
+    }
 </ul>
