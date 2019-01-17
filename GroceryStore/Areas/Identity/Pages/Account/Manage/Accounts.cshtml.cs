@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 {
+    [Authorize(Roles = "Admin")]
     public class AccountsModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -23,8 +24,6 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
         public IActionResult OnGet()
         {
-            var user = User;
-
             Users = _userManager.Users.ToList();
 
             return Page();
