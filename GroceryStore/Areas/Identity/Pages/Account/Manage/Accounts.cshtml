@@ -17,21 +17,20 @@
                         <th>First Name</th>
                         <th>Last Name</th>
                         <th>Email</th>
-                        <th>Phone Number</th>                        
+                        <th>Phone Number</th>       
+                        <th>Role</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model.Users)
                     {
                         <tr>
-                            <td>@item.UserName</td>
+                            <td>@item.Username</td>
                             <td>@item.FirstName</td>
                             <td>@item.LastName</td>
                             <td>@item.Email</td>
-                            @{ 
-                                string phoneNumber = item.PhoneNumber ?? "N/A";
-                            }
-                            <td>@phoneNumber</td>
+                            <td>@item.PhoneNumber</td>
+                            <td>@item.Role</td>
                         </tr>
                     }
                 </tbody>
