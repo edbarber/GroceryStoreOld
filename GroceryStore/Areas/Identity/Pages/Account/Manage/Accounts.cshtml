@@ -44,7 +44,13 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $("#accountTable").DataTable();
+            var paginate = $("#accountTable").children()[1].children.length > 10;
+
+            $("#accountTable").DataTable({
+                pageLength: 10,
+                bLengthChange: false,
+                bPaginate: paginate
+            });
         });
     </script>
 }
