@@ -17,9 +17,6 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
     {
         private readonly ApplicationDbContext _context;
 
-        [BindProperty]
-        public OutputModel Output { get; set; }
-
         public class OutputModel
         {
             public string Username { get; set; }
