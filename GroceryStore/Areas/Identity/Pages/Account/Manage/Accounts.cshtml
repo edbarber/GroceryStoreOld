@@ -1,0 +1,56 @@
+﻿@page
+@model AccountsModel
+@{
+    ViewData["Title"] = "Accounts";
+    ViewData["ActivePage"] = ManageNavPages.Accounts;
+}
+
+<h4>@ViewData["Title"]</h4>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="table-responsive">
+            <table class="table table-striped" id="accountTable">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>       
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Users)
+                    {
+                        <tr>
+                            <td>@item.Username</td>
+                            <td>@item.FirstName</td>
+                            <td>@item.LastName</td>
+                            <td>@item.Email</td>
+                            <td>@item.PhoneNumber</td>
+                            <td>@item.Role</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var paginate = $("#accountTable").children()[1].children.length > 10;
+
+            $("#accountTable").DataTable({
+                pageLength: 10,
+                bLengthChange: false,
+                bPaginate: paginate
+            });
+        });
+    </script>
+}

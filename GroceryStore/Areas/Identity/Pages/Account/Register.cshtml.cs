@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace GroceryStore.Areas.Identity.Pages.Account
 {
@@ -53,6 +54,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account
             public string UserName { get; set; }
 
             [Display(Name = "Phone number")]
+            [Phone]
             public string PhoneNumber { get; set; }
 
             [Required]
@@ -90,11 +92,26 @@ namespace GroceryStore.Areas.Identity.Pages.Account
                     FirstName = Input.FirstName,
                     LastName = Input.LastName
                 };
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+                }
 
+                List<IdentityError> errors = result.Errors.ToList();
+
+                result = await _userManager.AddToRoleAsync(user, "User");
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User role added to user account.");
+                }
+
+                errors.AddRange(result.Errors);
+
+                if (errors.Count == 0)
+                {
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
@@ -108,7 +125,8 @@ namespace GroceryStore.Areas.Identity.Pages.Account
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(returnUrl);
                 }
-                foreach (var error in result.Errors)
+
+                foreach (var error in errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }

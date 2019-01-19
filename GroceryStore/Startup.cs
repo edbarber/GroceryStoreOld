@@ -14,6 +14,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GroceryStore.Models;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
+using GroceryStore.Areas.Identity.Pages.Account;
 
 namespace GroceryStore
 {
@@ -67,7 +69,7 @@ namespace GroceryStore
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext context,
-            RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager)
+            RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, ILogger<RegisterModel> logger)
         {
             if (env.IsDevelopment())
             {
@@ -93,7 +95,7 @@ namespace GroceryStore
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            AdminData.Initialize(context, userManager, roleManager, Configuration).Wait();
+            SeedData.Initialize(context, userManager, roleManager, Configuration, logger).Wait();
         }
     }
 }
