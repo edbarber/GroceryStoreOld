@@ -54,6 +54,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account
             public string UserName { get; set; }
 
             [Display(Name = "Phone number")]
+            [Phone]
             public string PhoneNumber { get; set; }
 
             [Required]
