@@ -94,21 +94,27 @@ namespace GroceryStore.Areas.Identity.Pages.Account
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
+                List<IdentityError> errors = new List<IdentityError>();
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    result = await _userManager.AddToRoleAsync(user, "User");
+
+                    if (result.Succeeded)
+                    {
+                        _logger.LogInformation("User role added to user account.");
+                    }
+                    else
+                    {
+                        errors.AddRange(result.Errors);
+                    }
                 }
-
-                List<IdentityError> errors = result.Errors.ToList();
-
-                result = await _userManager.AddToRoleAsync(user, "User");
-                if (result.Succeeded)
+                else
                 {
-                    _logger.LogInformation("User role added to user account.");
+                    errors.AddRange(result.Errors);
                 }
-
-                errors.AddRange(result.Errors);
 
                 if (errors.Count == 0)
                 {
