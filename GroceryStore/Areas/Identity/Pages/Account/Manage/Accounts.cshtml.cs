@@ -77,6 +77,11 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 return new JsonResult(string.Empty);
             }
 
+            if (user.Id == _userManager.GetUserId(User))
+            {
+                await _signInManager.SignOutAsync();
+            }
+
             var result = await _userManager.DeleteAsync(user);
             if (!result.Succeeded)
             {

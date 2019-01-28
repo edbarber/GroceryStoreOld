@@ -9,12 +9,14 @@
 <partial name="_StatusMessage" model="Model.StatusMessage" />
 <div class="row">
     <div class="col-md-12">
-        <div class="form-group">
-            <a href="./AddAccount" class="btn btn-default">Add Account</a>
-        </div>
-        <div class="form-group">
-            <button class="btn btn-default" onclick="return deleteAccounts()">Delete Selected</button>
-            @Html.AntiForgeryToken()
+        <div class="form-inline">
+            <div class="form-group">
+                <a href="./AddAccount" class="btn btn-default">Add Account</a>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-default" onclick="return deleteAccounts()">Delete Selected</button>
+                @Html.AntiForgeryToken()
+            </div>
         </div>
         <div class="table-responsive">
             <table class="table table-striped" id="accountTable">
@@ -45,7 +47,12 @@
                             <td>@item.PhoneNumber</td>
                             <td>@item.Role</td>
                             <td>
-                                <button class="btn btn-danger" id="@item.Id" onclick="return confirmDeleteAccount(id)"><i class="glyphicon glyphicon-trash"></i></button>
+                                <div class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" style="color:#333;"><i class="glyphicon glyphicon-option-vertical"></i></a>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                        <li><a href="#" id="@item.Id" onclick="return confirmDeleteAccount(id)">Delete</a></li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -71,7 +78,8 @@
                         targets: [0, 7],
                         orderable: false
                     }
-                ]
+                ],
+                order: [ [1, 'asc'] ]
             });
         });
 
