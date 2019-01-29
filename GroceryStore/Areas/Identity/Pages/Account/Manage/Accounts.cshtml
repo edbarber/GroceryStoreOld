@@ -18,47 +18,47 @@
                 @Html.AntiForgeryToken()
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-striped" id="accountTable">
-                <thead>
+        <table class="table table-striped" id="accountTable">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" onclick="toggleAll()" /></th>
+                    <th>Username</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Role</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Users)
+                {
                     <tr>
-                        <th><input type="checkbox" id="selectAll" onclick="toggleAll()" /></th>
-                        <th>Username</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Email</th>
-                        <th>Phone Number</th>
-                        <th>Role</th>
-                        <th></th>
+                        <td>
+                            <input asp-for="@item.IdSelected" type="checkbox" class="idSelector" />
+                            <input asp-for="@item.Id" type="hidden" class="idValue" />
+                        </td>
+                        <td>@item.Username</td>
+                        <td>@item.FirstName</td>
+                        <td>@item.LastName</td>
+                        <td>@item.Email</td>
+                        <td>@item.PhoneNumber</td>
+                        <td>@item.Role</td>
+                        <td>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" style="color:#333;"><i class="glyphicon glyphicon-option-vertical"></i></a>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li><a href="./EditAccount?id=@item.Id">Edit</a></li>
+                                    <li><a href="./EditAccountPassword?id=@item.Id">Update Password</a></li>
+                                    <li><a href="#" id="@item.Id" onclick="return confirmDeleteAccount(id)">Delete</a></li>
+                                </ul>
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.Users)
-                    {
-                        <tr>
-                            <td>
-                                <input asp-for="@item.IdSelected" type="checkbox" class="idSelector" />
-                                <input asp-for="@item.Id" type="hidden" class="idValue" />
-                            </td>
-                            <td>@item.Username</td>
-                            <td>@item.FirstName</td>
-                            <td>@item.LastName</td>
-                            <td>@item.Email</td>
-                            <td>@item.PhoneNumber</td>
-                            <td>@item.Role</td>
-                            <td>
-                                <div class="dropdown">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" style="color:#333;"><i class="glyphicon glyphicon-option-vertical"></i></a>
-                                    <ul class="dropdown-menu dropdown-menu-right">
-                                        <li><a href="#" id="@item.Id" onclick="return confirmDeleteAccount(id)">Delete</a></li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
 
