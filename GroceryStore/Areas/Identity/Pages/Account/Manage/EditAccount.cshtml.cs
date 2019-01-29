@@ -71,6 +71,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             };
 
             ViewData["User"] = user.UserName;
+            ViewData["Id"] = user.Id;
 
             return Page();
         }
@@ -84,6 +85,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             }
 
             ViewData["User"] = user.UserName;
+            ViewData["Id"] = user.Id;
 
             if (!ModelState.IsValid)
             {

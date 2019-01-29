@@ -62,7 +62,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(string id)
+        public async Task<IActionResult> OnPostAsync(string id, string returnURL)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
@@ -101,7 +101,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             _logger.LogInformation($"Admin changed user {id} password successfully.");
             StatusMessage = "Password has been changed.";
 
-            return Redirect("./Accounts");
+            return Redirect(returnURL ?? "./Accounts");
         }
     }
 }
