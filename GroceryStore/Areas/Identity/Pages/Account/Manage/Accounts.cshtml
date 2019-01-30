@@ -11,7 +11,7 @@
     <div class="col-md-12">
         <div class="form-inline">
             <div class="form-group">
-                <a href="./AddAccount" class="btn btn-default">Add Account</a>
+                <a asp-page="./AddAccount" class="btn btn-default">Add Account</a>
             </div>
             <div class="form-group">
                 <button class="btn btn-default" onclick="return deleteAccounts()">Delete Selected</button>
@@ -32,31 +32,31 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.Users)
-                {
-                    <tr>
-                        <td>
-                            <input asp-for="@item.IdSelected" type="checkbox" class="idSelector" />
-                            <input asp-for="@item.Id" type="hidden" class="idValue" />
-                        </td>
-                        <td>@item.Username</td>
-                        <td>@item.FirstName</td>
-                        <td>@item.LastName</td>
-                        <td>@item.Email</td>
-                        <td>@item.PhoneNumber</td>
-                        <td>@item.Role</td>
-                        <td>
-                            <div class="dropdown">
-                                <a class="dropdown-toggle" data-toggle="dropdown" style="color:#333;"><i class="glyphicon glyphicon-option-vertical"></i></a>
-                                <ul class="dropdown-menu dropdown-menu-right">
-                                    <li><a href="./EditAccount?id=@item.Id">Edit</a></li>
-                                    <li><a href="./EditAccountPassword?id=@item.Id&returnURL=./Accounts">Update Password</a></li>
-                                    <li><a href="#" id="@item.Id" onclick="return confirmDeleteAccount(id)">Delete</a></li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                }
+            @foreach (var item in Model.Users)
+            {
+                <tr>
+                    <td>
+                        <input asp-for="@item.IdSelected" type="checkbox" class="idSelector" />
+                        <input asp-for="@item.Id" type="hidden" class="idValue" />
+                    </td>
+                    <td>@item.Username</td>
+                    <td>@item.FirstName</td>
+                    <td>@item.LastName</td>
+                    <td>@item.Email</td>
+                    <td>@item.PhoneNumber</td>
+                    <td>@item.Role</td>
+                    <td>
+                        <div class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" style="color:#333;"><i class="glyphicon glyphicon-option-vertical"></i></a>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                <li><a asp-page="./EditAccount" asp-route-id="@item.Id">Edit</a></li>
+                                <li><a asp-page="./EditAccountPassword" asp-route-id="@item.Id" asp-route-returnURL="./Accounts">Update Password</a></li>
+                                <li><a href="#" id="@item.Id" onclick="return confirmDeleteAccount(id)">Delete</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            }
             </tbody>
         </table>
     </div>
@@ -73,6 +73,7 @@
                 pageLength: 10,
                 bLengthChange: false,
                 bPaginate: paginate,
+                bInfo: false,
                 columnDefs: [
                     {
                         targets: [0, 7],

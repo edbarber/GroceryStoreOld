@@ -1,0 +1,129 @@
+﻿@page
+@model RolesModel
+@{
+    ViewData["Title"] = "Roles";
+    ViewData["ActivePage"] = ManageNavPages.Roles;
+}
+
+<h4>@ViewData["Title"]</h4>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-inline">
+            <div class="form-group">
+                <button class="btn btn-default" onclick="expandAll()">Expand All</button>
+                <button class="btn btn-default" onclick="collapseAll()">Collapse All</button>
+            </div>
+        </div>
+        <table class="table table-striped" id="roleTable">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.RolesAndUsers)
+            {
+                <tr>
+                    <td><span class="details-control details-control-collapsed"></span>@item.Role</td>
+                </tr>
+                <tr class="hidden">
+                    <td>
+                        <table class="table table-bordered table-condensed childTable">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email</th>
+                                    <th>Phone Number</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var user in item.Users)
+                            {
+                                <tr>
+                                    <td>@user.UserName</td>
+                                    <td>@user.FirstName</td>
+                                    <td>@user.LastName</td>
+                                    <td>@user.Email</td>
+                                    <td>@user.PhoneNumber</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var paginate = $("#roleTable").children()[1].children.length > 10;
+
+            $("#roleTable").DataTable({
+                pageLength: 10,
+                bLengthChange: false,
+                bPaginate: paginate,
+                ordering: false,
+                bInfo: false
+            });
+
+            $(".childTable").DataTable({
+                bLengthChange: false,
+                bPaginate: false,
+                bFilter: false,
+                bInfo: false
+            });
+
+            $('.details-control').on('click', function () {
+                var row = $(this).parent().parent().next();
+
+                if (row.hasClass('hidden')) {
+                    row.removeClass('hidden');
+                    $(this).removeClass('details-control-collapsed');
+                    $(this).addClass('details-control-open');
+                }
+                else {
+                    row.addClass('hidden');
+                    $(this).removeClass('details-control-open');
+                    $(this).addClass('details-control-collapsed');
+                }
+            });
+        });
+
+        function expandAll() {
+            $('#roleTable > tbody > tr').each(function (index, element) {
+                var child = $(element).children()[0].children[0];
+
+                if ($(child).hasClass('details-control')) {
+                    $(child).removeClass('details-control-collapsed');
+                    $(child).addClass('details-control-open');
+                }
+                else {
+                    $(element).removeClass('hidden');
+                }
+            });
+        }
+
+        function collapseAll() {
+            $('#roleTable > tbody > tr').each(function (index, element) {
+                var child = $(element).children()[0].children[0];
+
+                if ($(child).hasClass('details-control')) {
+                    $(child).removeClass('details-control-open');
+                    $(child).addClass('details-control-collapsed');
+                }
+                else {
+                    // don't add twice
+                    if (!$(element).hasClass('hidden')) {
+                        $(element).addClass('hidden');
+                    }
+                }
+            });
+        }
+    </script>
+}

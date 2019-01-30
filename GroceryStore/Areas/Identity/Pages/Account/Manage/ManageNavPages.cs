@@ -24,6 +24,8 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
         public static string Accounts => "Accounts";
 
+        public static string Roles => "Roles";
+
         public static string IndexNavClass(ViewContext viewContext) => PageNavClass(viewContext, Index);
 
         public static string ChangePasswordNavClass(ViewContext viewContext) => PageNavClass(viewContext, ChangePassword);
@@ -39,6 +41,8 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         public static string TwoFactorAuthenticationNavClass(ViewContext viewContext) => PageNavClass(viewContext, TwoFactorAuthentication);
 
         public static string AccountsNavClass(ViewContext viewContext) => PageNavClass(viewContext, Accounts);
+
+        public static string RolesNavClass(ViewContext viewContext) => PageNavClass(viewContext, Roles);
 
         public static string PageNavClass(ViewContext viewContext, string page)
         {
