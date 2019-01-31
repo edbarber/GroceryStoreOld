@@ -89,6 +89,8 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             }
 
             _logger.LogInformation($"User with ID '{id}' deleted by admin.");
+            StatusMessage = $"Profile(s) have been removed";
+
             return new JsonResult(string.Empty);
         }
     }

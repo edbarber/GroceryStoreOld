@@ -23,35 +23,26 @@
             <tbody>
             @foreach (var item in Model.RolesAndUsers)
             {
-                <tr>
-                    <td><span class="details-control details-control-collapsed"></span>@item.Role</td>
+                <tr class="details-control">
+                    <td><span class="details-control-collapsed"></span>@item.Role</td>
                 </tr>
                 <tr class="hidden">
+                @if (item.Users.Count > 0)
+                {
                     <td>
-                        <table class="table table-bordered table-condensed childTable">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
-                                    <th>Email</th>
-                                    <th>Phone Number</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <dl class="dl-horizontal">
+                            <dt>Associated Users</dt>
                             @foreach (var user in item.Users)
                             {
-                                <tr>
-                                    <td>@user.UserName</td>
-                                    <td>@user.FirstName</td>
-                                    <td>@user.LastName</td>
-                                    <td>@user.Email</td>
-                                    <td>@user.PhoneNumber</td>
-                                </tr>
+                                <dd>@user.UserName</dd>
                             }
-                            </tbody>
-                        </table>
+                        </dl>
                     </td>
+                }
+                else
+                {
+                    <td>There are no users associated with this role</td>
+                }
                 </tr>
             }
             </tbody>
@@ -72,25 +63,19 @@
                 bInfo: false
             });
 
-            $(".childTable").DataTable({
-                bLengthChange: false,
-                bPaginate: false,
-                bFilter: false,
-                bInfo: false
-            });
-
             $('.details-control').on('click', function () {
-                var row = $(this).parent().parent().next();
+                var row = $(this).next();
+                var child = $(this).children()[0].children[0];
 
                 if (row.hasClass('hidden')) {
                     row.removeClass('hidden');
-                    $(this).removeClass('details-control-collapsed');
-                    $(this).addClass('details-control-open');
+                    $(child).removeClass('details-control-collapsed');
+                    $(child).addClass('details-control-open');
                 }
                 else {
                     row.addClass('hidden');
-                    $(this).removeClass('details-control-open');
-                    $(this).addClass('details-control-collapsed');
+                    $(child).removeClass('details-control-open');
+                    $(child).addClass('details-control-collapsed');
                 }
             });
         });
@@ -99,7 +84,7 @@
             $('#roleTable > tbody > tr').each(function (index, element) {
                 var child = $(element).children()[0].children[0];
 
-                if ($(child).hasClass('details-control')) {
+                if ($(element).hasClass('details-control')) {
                     $(child).removeClass('details-control-collapsed');
                     $(child).addClass('details-control-open');
                 }
@@ -113,7 +98,7 @@
             $('#roleTable > tbody > tr').each(function (index, element) {
                 var child = $(element).children()[0].children[0];
 
-                if ($(child).hasClass('details-control')) {
+                if ($(element).hasClass('details-control')) {
                     $(child).removeClass('details-control-open');
                     $(child).addClass('details-control-collapsed');
                 }

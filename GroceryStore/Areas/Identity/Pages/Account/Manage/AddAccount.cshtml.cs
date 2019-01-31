@@ -30,6 +30,9 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             _emailSender = emailSender;
         }
 
+        [TempData]
+        public string StatusMessage { get; set; }
+
         [BindProperty]
         public InputModel Input { get; set; }
 
@@ -121,6 +124,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
+                    StatusMessage = "Profile has been added";
                     return Redirect("./Accounts");
                 }
 

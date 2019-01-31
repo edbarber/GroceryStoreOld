@@ -67,9 +67,13 @@ table.dataTable thead th.sorting_desc:after {
     content: "\f0dd";
 }
 
-span.details-control {
-    margin-right: 5px;
+tr.details-control {
     cursor: pointer;
+}
+
+span.details-control-open::before,
+span.details-control-collapsed::before {
+    margin-right: 5px;
 }
 
 span.details-control-open::before {

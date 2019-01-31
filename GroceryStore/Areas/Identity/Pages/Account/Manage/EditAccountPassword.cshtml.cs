@@ -99,7 +99,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             }
 
             _logger.LogInformation($"Admin changed user {id} password successfully.");
-            StatusMessage = "Password has been changed.";
+            StatusMessage = "Password has been changed";
 
             return Redirect(returnURL ?? "./Accounts");
         }
