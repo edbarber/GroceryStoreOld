@@ -6,36 +6,59 @@
 }
 
 <h4>@ViewData["Title"]</h4>
-
+<partial name="_StatusMessage" model="Model.StatusMessage" />
 <div class="row">
     <div class="col-md-12">
-        <div class="table-responsive">
-            <table class="table table-striped" id="accountTable">
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Email</th>
-                        <th>Phone Number</th>       
-                        <th>Role</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.Users)
-                    {
-                        <tr>
-                            <td>@item.Username</td>
-                            <td>@item.FirstName</td>
-                            <td>@item.LastName</td>
-                            <td>@item.Email</td>
-                            <td>@item.PhoneNumber</td>
-                            <td>@item.Role</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="form-inline">
+            <div class="form-group">
+                <a asp-page="./AddAccount" class="btn btn-default">Add Account</a>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-default" onclick="return deleteAccounts()">Delete Selected</button>
+                @Html.AntiForgeryToken()
+            </div>
         </div>
+        <table class="table table-striped" id="accountTable">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" onclick="toggleAll()" /></th>
+                    <th>Username</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Role</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Users)
+            {
+                <tr>
+                    <td>
+                        <input asp-for="@item.IdSelected" type="checkbox" class="idSelector" />
+                        <input asp-for="@item.Id" type="hidden" class="idValue" />
+                    </td>
+                    <td>@item.Username</td>
+                    <td>@item.FirstName</td>
+                    <td>@item.LastName</td>
+                    <td>@item.Email</td>
+                    <td>@item.PhoneNumber</td>
+                    <td>@item.Role</td>
+                    <td>
+                        <div class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" style="color:#333;"><i class="glyphicon glyphicon-option-vertical"></i></a>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                <li><a asp-page="./EditAccount" asp-route-id="@item.Id">Edit</a></li>
+                                <li><a asp-page="./EditAccountPassword" asp-route-id="@item.Id" asp-route-returnURL="./Accounts">Update Password</a></li>
+                                <li><a href="#" id="@item.Id" onclick="return confirmDeleteAccount(id)">Delete</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -49,8 +72,66 @@
             $("#accountTable").DataTable({
                 pageLength: 10,
                 bLengthChange: false,
-                bPaginate: paginate
+                bPaginate: paginate,
+                bInfo: false,
+                columnDefs: [
+                    {
+                        targets: [0, 7],
+                        orderable: false
+                    }
+                ],
+                order: [ [1, 'asc'] ]
             });
         });
+
+        function toggleAll() {
+            var value = $('#selectAll').prop('checked');
+
+            if (value) {
+                $('.idSelector').each(function (index, element) {
+                    $(element).prop('checked', true);
+                });
+            }
+            else {
+                $('.idSelector').each(function (index, element) {
+                    $(element).prop('checked', false);
+                });
+            }
+        }
+
+        function deleteAccounts() {
+            if (confirm('Are you sure you want to delete the selected users?')) {
+                $('.idSelector').each(function (index, element) {
+                    if ($(element).prop('checked')) {
+                        var id = $(element).siblings('.idValue').first().val();
+
+                        deleteAccount(id);
+                    }
+                });
+            }
+        }
+
+        function confirmDeleteAccount(id) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                deleteAccount(id);
+            }
+        }
+
+        function deleteAccount(id) {
+            $.ajax({
+                url: '@Url.Page("Accounts")',
+                type: 'POST',
+                data: {
+                    id: id
+                },
+                headers: {
+                    RequestVerificationToken:
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (data) {
+                    window.location.replace(data);
+                }
+            });
+        }
     </script>
 }

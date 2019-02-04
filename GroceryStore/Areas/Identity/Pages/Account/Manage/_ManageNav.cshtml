@@ -16,5 +16,6 @@
     @if (User.IsInRole("Admin"))
     {
         <li class="@ManageNavPages.AccountsNavClass(ViewContext)"><a asp-page="./Accounts">Accounts</a></li>
+        <li class="@ManageNavPages.RolesNavClass(ViewContext)"><a asp-page="./Roles">Roles</a></li>
     }
 </ul>
