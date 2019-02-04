@@ -67,7 +67,7 @@ table.dataTable thead th.sorting_desc:after {
     content: "\f0dd";
 }
 
-tr.details-control {
+.details-control {
     cursor: pointer;
 }
 

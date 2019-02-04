@@ -4,16 +4,29 @@
 
 <h2>Groceries</h2>
 <div class="row">
-    <div class="col-md-4 form-group form-inline pull-right visible-lg visible-md">
-        <div class="pull-right">
-            <label for="search1">Search</label>
-            <input type="text" class="form-control" id="search1" onkeyup="search(value)" />
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading details-control"><span class="details-control-open"></span>Search</div>
+            <div class="panel-body">
+                <div class="form-group col-md-3">
+                    <label for="searchName">Search name</label>
+                    <input class="form-control" id="searchName" />
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="searchPrice">Search price</label>
+                    <input class="form-control" id="searchPrice" />
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="searchWeight">Search weight</label>
+                    <input class="form-control" id="searchWeight" />
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="searchConversionCode">Search conversion code</label>
+                    <input class="form-control" id="searchConversionCode" />
+                </div>
+                @Html.AntiForgeryToken()
+            </div>
         </div>
-    </div>
-    <div class="col-md-4 form-group visible-sm visible-xs">
-        <label for="search2">Search</label>
-        <input type="text" class="form-control" id="search2" onkeyup="search(value)" />
-        @Html.AntiForgeryToken()
     </div>
 </div>
 <div class="row" id="groceries"></div>
@@ -21,15 +34,50 @@
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            search("");
+            search('', '', '', '');
+
+            $('#searchName').on('keyup', function () {
+                search($(this).val(), $('#searchPrice').val(), $('#searchWeight').val(), $('#searchConversionCode').val());
+            });
+
+            $('#searchPrice').on('keyup', function () {
+                search($('#searchName').val(), $(this).val(), $('#searchWeight').val(), $('#searchConversionCode').val());
+            });
+
+            $('#searchWeight').on('keyup', function () {
+                search($('#searchName').val(), $('#searchPrice').val(), $(this).val(), $('#searchConversionCode').val());
+            });
+
+            $('#searchConversionCode').on('keyup', function () {
+                search($('#searchName').val(), $('#searchPrice').val(), $('#searchWeight').val(), $(this).val());
+            });
+
+            $('.details-control').on('click', function () {
+                var sibling = $(this).next();
+                var child = $(this).children()[0];
+
+                if (!sibling.hasClass('hidden')) {
+                    $(child).removeClass('details-control-open');
+                    $(child).addClass('details-control-collapsed');
+                    sibling.addClass('hidden');
+                }
+                else {
+                    $(child).removeClass('details-control-collapsed');
+                    $(child).addClass('details-control-open');
+                    sibling.removeClass('hidden');
+                }
+            });
         });
 
-        function search(term) {
+        function search(name, price, weight, conversionCode) {
             $.ajax({
                 url: '@Url.Action("Search", "Home")',
                 type: 'POST',
                 data: {
-                    value: term
+                    name: name,
+                    price: price,
+                    weight: weight,
+                    conversionCode: conversionCode
                 },
                 headers: {
                     RequestVerificationToken:

@@ -25,18 +25,31 @@ namespace GroceryStore.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Search(string value)
+        public IActionResult Search(string name, string price, string weight, string conversionCode)
         {
-            if (string.IsNullOrWhiteSpace(value))
+            IEnumerable<Grocery> groceryStoreContext = _context.Grocery.Include(g => g.Conversion);
+
+            if (!string.IsNullOrWhiteSpace(name))
             {
-                var groceryStoreContext = _context.Grocery.Include(g => g.Conversion);
-                return Json(await groceryStoreContext.ToListAsync());
+                groceryStoreContext = groceryStoreContext.Where(g => g.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
             }
-            else
+
+            if (!string.IsNullOrWhiteSpace(price))
             {
-                var groceryStoreContext = _context.Grocery.Include(g => g.Conversion).Where(g => g.Name.Contains(value, StringComparison.CurrentCultureIgnoreCase));
-                return Json(await groceryStoreContext.ToListAsync());
+                groceryStoreContext = groceryStoreContext.Where(g => g.Price.ToString().Contains(price, StringComparison.CurrentCultureIgnoreCase));
             }
+
+            if (!string.IsNullOrWhiteSpace(weight))
+            {
+                groceryStoreContext = groceryStoreContext.Where(g => g.Weight.ToString().Contains(weight, StringComparison.CurrentCultureIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(conversionCode))
+            {
+                groceryStoreContext = groceryStoreContext.Where(g => g.Conversion.Code.Contains(conversionCode, StringComparison.CurrentCultureIgnoreCase));
+            }
+
+            return Json(groceryStoreContext);
         }
 
         public async Task<IActionResult> Stock(int id)
