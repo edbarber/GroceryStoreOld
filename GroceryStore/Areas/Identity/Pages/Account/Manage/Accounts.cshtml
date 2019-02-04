@@ -119,7 +119,7 @@
 
         function deleteAccount(id) {
             $.ajax({
-                url: '',
+                url: '@Url.Page("Accounts")',
                 type: 'POST',
                 data: {
                     id: id

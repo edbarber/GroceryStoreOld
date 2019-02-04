@@ -24,6 +24,7 @@ namespace GroceryStore.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Search(string value)
         {
             if (string.IsNullOrWhiteSpace(value))

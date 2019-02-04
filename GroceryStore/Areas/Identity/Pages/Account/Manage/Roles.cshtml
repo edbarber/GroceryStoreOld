@@ -8,11 +8,20 @@
 <h4>@ViewData["Title"]</h4>
 <div class="row">
     <div class="col-md-12">
-        <div class="form-inline">
-            <div class="form-group">
-                <button class="btn btn-default" onclick="expandAll()">Expand All</button>
-                <button class="btn btn-default" onclick="collapseAll()">Collapse All</button>
+        <div class="form-group col-md-4">
+            <button class="btn btn-default" onclick="expandAll()">Expand All</button>
+            <button class="btn btn-default" onclick="collapseAll()">Collapse All</button>
+        </div>
+        <div class="form-group">
+            <div class="form-group col-md-4">
+                <label for="roleSearch">Search role</label>
+                <input id="roleSearch" class="form-control" />
             </div>
+            <div class="form-group col-md-4">
+                <label for="userSearch">Search user</label>
+                <input id="userSearch" class="form-control" />
+            </div>
+            @Html.AntiForgeryToken()
         </div>
         <table class="table table-striped" id="roleTable">
             <thead>
@@ -20,32 +29,7 @@
                     <th>Role</th>
                 </tr>
             </thead>
-            <tbody>
-            @foreach (var item in Model.RolesAndUsers)
-            {
-                <tr class="details-control">
-                    <td><span class="details-control-collapsed"></span>@item.Role</td>
-                </tr>
-                <tr class="hidden">
-                @if (item.Users.Count > 0)
-                {
-                    <td>
-                        <dl class="dl-horizontal">
-                            <dt>Associated Users</dt>
-                            @foreach (var user in item.Users)
-                            {
-                                <dd>@user.UserName</dd>
-                            }
-                        </dl>
-                    </td>
-                }
-                else
-                {
-                    <td>There are no users associated with this role</td>
-                }
-                </tr>
-            }
-            </tbody>
+            <tbody id="roleData"></tbody>
         </table>
     </div>
 </div>
@@ -53,6 +37,8 @@
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
+            search('', '');
+
             var paginate = $("#roleTable").children()[1].children.length > 10;
 
             $("#roleTable").DataTable({
@@ -60,25 +46,80 @@
                 bLengthChange: false,
                 bPaginate: paginate,
                 ordering: false,
+                searching: false,
                 bInfo: false
             });
 
-            $('.details-control').on('click', function () {
-                var row = $(this).next();
-                var child = $(this).children()[0].children[0];
+            $('#roleSearch').on('keyup', function () {
+                search($(this).val(), $('#userSearch').val());
+            });
 
-                if (row.hasClass('hidden')) {
-                    row.removeClass('hidden');
-                    $(child).removeClass('details-control-collapsed');
-                    $(child).addClass('details-control-open');
-                }
-                else {
-                    row.addClass('hidden');
-                    $(child).removeClass('details-control-open');
-                    $(child).addClass('details-control-collapsed');
-                }
+            $('#userSearch').on('keyup', function () {
+                search($('#roleSearch').val(), $(this).val());
             });
         });
+
+        function search(role, user) {
+            $.ajax({
+                url: '@Url.Page("Roles")',
+                type: 'POST',
+                data: {
+                    role: role,
+                    user: user
+                },
+                headers: {
+                    RequestVerificationToken:
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (data) {
+                    var body = $('#roleData');
+
+                    body.empty();
+
+                    if (data.length > 0) {
+                        for (var i = 0; i < data.length; i++) {
+                            var currChild = $('<tr>').appendTo(body).addClass('details-control').on('click', function () {
+                                var row = $(this).next();
+                                var child = $(this).children()[0].children[0];
+
+                                if (row.hasClass('hidden')) {
+                                    row.removeClass('hidden');
+                                    $(child).removeClass('details-control-collapsed');
+                                    $(child).addClass('details-control-open');
+                                }
+                                else {
+                                    row.addClass('hidden');
+                                    $(child).removeClass('details-control-open');
+                                    $(child).addClass('details-control-collapsed');
+                                }
+                            });
+
+                            currChild = $('<td>').appendTo(currChild);
+                            $('<span>').appendTo(currChild).addClass('details-control-open').after(data[i].role);
+
+                            currChild = $('<tr>').appendTo(body);
+
+                            if (data[i].users.length > 0) {
+                                currChild = $('<td>').appendTo(currChild);
+                                currChild = $('<dl>').appendTo(currChild).addClass('dl-horizontal');
+                                $('<dt>').appendTo(currChild).text('Associated Users');
+
+                                for (var j = 0; j < data[i].users.length; j++) {
+                                    $('<dd>').appendTo(currChild).text(data[i].users[j].userName);
+                                }
+                            }
+                            else {
+                                $('<td>').appendTo(currChild).text('There are no users associated with this role');
+                            }
+                        }
+                    }
+                    else {
+                        var currChild = $('<tr>').appendTo(body);
+                        $('<td>').appendTo(currChild).text('There are no matching roles');
+                    }
+                }
+            });
+        }
 
         function expandAll() {
             $('#roleTable > tbody > tr').each(function (index, element) {
