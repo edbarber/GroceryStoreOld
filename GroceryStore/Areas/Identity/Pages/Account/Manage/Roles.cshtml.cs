@@ -26,6 +26,9 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             public List<ApplicationUser> Users { get; set; }
         }
 
+        [TempData]
+        public string StatusMessage { get; set; }
+
         public List<OutputModel> RolesAndUsers { get; set; }
 
         public IActionResult OnGet()

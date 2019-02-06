@@ -6,23 +6,36 @@
 }
 
 <h4>@ViewData["Title"]</h4>
+<partial name="_StatusMessage" model="Model.StatusMessage" />
 <div class="row">
     <div class="col-md-12">
-        <div class="form-group col-md-4">
-            <button class="btn btn-default" onclick="expandAll()">Expand All</button>
-            <button class="btn btn-default" onclick="collapseAll()">Collapse All</button>
-        </div>
-        <div class="form-group">
-            <div class="form-group col-md-4">
-                <label for="roleSearch">Search role</label>
-                <input id="roleSearch" class="form-control" />
+        <div class="panel panel-default">
+            <div class="panel-heading details-control"><span class="details-control-collapsed"></span>Search</div>
+            <div class="panel-body hidden">
+                <div class="col-md-4 form-group">
+                    <label for="roleSearch">Search role</label>
+                    <input id="roleSearch" class="form-control" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="userSearch">Search user</label>
+                    <input id="userSearch" class="form-control" />
+                </div>
+                @Html.AntiForgeryToken()
             </div>
-            <div class="form-group col-md-4">
-                <label for="userSearch">Search user</label>
-                <input id="userSearch" class="form-control" />
-            </div>
-            @Html.AntiForgeryToken()
         </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <button class="btn btn-default" onclick="expandAll()" id="expandRows">Expand All</button>
+        <button class="btn btn-default" onclick="collapseAll()" id="collapseRows">Collapse All</button>
+        <div class="pull-right">
+            <a asp-page="./AddRole" class="btn btn-default">Add Role</a>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
         <table class="table table-striped" id="roleTable">
             <thead>
                 <tr>
@@ -36,19 +49,11 @@
 
 @section Scripts {
     <script type="text/javascript">
+        var bError = false;
+        var bDataTableInitialized = false;
+
         $(document).ready(function () {
             search('', '');
-
-            var paginate = $("#roleTable").children()[1].children.length > 10;
-
-            $("#roleTable").DataTable({
-                pageLength: 10,
-                bLengthChange: false,
-                bPaginate: paginate,
-                ordering: false,
-                searching: false,
-                bInfo: false
-            });
 
             $('#roleSearch').on('keyup', function () {
                 search($(this).val(), $('#userSearch').val());
@@ -56,6 +61,22 @@
 
             $('#userSearch').on('keyup', function () {
                 search($('#roleSearch').val(), $(this).val());
+            });
+
+            $('.details-control').on('click', function () {
+                var sibling = $(this).next();
+                var child = $(this).children()[0];
+
+                if (!sibling.hasClass('hidden')) {
+                    $(child).removeClass('details-control-open');
+                    $(child).addClass('details-control-collapsed');
+                    sibling.addClass('hidden');
+                }
+                else {
+                    $(child).removeClass('details-control-collapsed');
+                    $(child).addClass('details-control-open');
+                    sibling.removeClass('hidden');
+                }
             });
         });
 
@@ -117,39 +138,72 @@
                         var currChild = $('<tr>').appendTo(body);
                         $('<td>').appendTo(currChild).text('There are no matching roles');
                     }
+
+                    bError = false;
                 }
+            }).fail(function () {
+                var body = $('#roleData');
+
+                body.empty();
+
+                var currChild = $('<tr>').appendTo(body);
+                $('<td>').appendTo(currChild).text('An error has occured while getting the roles. Try refreshing the page or coming back later.').addClass('text-danger');
+
+                bError = true;
             });
+
+            // Don't initialize again as doing so will cause errors (lack of gc collection in datatables plugin)
+            if (!bDataTableInitialized) {
+                // check to see if every odd row (rows with class details-control) is half of the required page length for each page 
+                // as checking against all rows produces ugly results for this layout when there are an odd number of rows
+                var paginate = $("#roleData").children('.details-control').length > 5;
+
+                dataTable = $("#roleTable").DataTable({
+                    pageLength: 10,
+                    bLengthChange: false,
+                    bPaginate: paginate,
+                    ordering: false,
+                    searching: false,
+                    bInfo: false
+                });
+
+                bDataTableInitialized = true;
+            }
         }
 
         function expandAll() {
-            $('#roleTable > tbody > tr').each(function (index, element) {
-                var child = $(element).children()[0].children[0];
+            if (!bError) {
+                $('#roleTable > tbody > tr').each(function (index, element) {
+                    var child = $(element).children()[0].children[0];
 
-                if ($(element).hasClass('details-control')) {
-                    $(child).removeClass('details-control-collapsed');
-                    $(child).addClass('details-control-open');
-                }
-                else {
-                    $(element).removeClass('hidden');
-                }
-            });
+                    if ($(element).hasClass('details-control')) {
+                        $(child).removeClass('details-control-collapsed');
+                        $(child).addClass('details-control-open');
+                    }
+                    else {
+                        $(element).removeClass('hidden');
+                    }
+                });
+            }
         }
 
         function collapseAll() {
-            $('#roleTable > tbody > tr').each(function (index, element) {
-                var child = $(element).children()[0].children[0];
+            if (!bError) {
+                $('#roleTable > tbody > tr').each(function (index, element) {
+                    var child = $(element).children()[0].children[0];
 
-                if ($(element).hasClass('details-control')) {
-                    $(child).removeClass('details-control-open');
-                    $(child).addClass('details-control-collapsed');
-                }
-                else {
-                    // don't add twice
-                    if (!$(element).hasClass('hidden')) {
-                        $(element).addClass('hidden');
+                    if ($(element).hasClass('details-control')) {
+                        $(child).removeClass('details-control-open');
+                        $(child).addClass('details-control-collapsed');
                     }
-                }
-            });
+                    else {
+                        // don't add twice
+                        if (!$(element).hasClass('hidden')) {
+                            $(element).addClass('hidden');
+                        }
+                    }
+                });
+            }
         }
     </script>
 }

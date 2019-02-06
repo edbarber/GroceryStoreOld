@@ -6,8 +6,8 @@
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-default">
-            <div class="panel-heading details-control"><span class="details-control-open"></span>Search</div>
-            <div class="panel-body">
+            <div class="panel-heading details-control"><span class="details-control-collapsed"></span>Search</div>
+            <div class="panel-body hidden">
                 <div class="form-group col-md-3">
                     <label for="searchName">Search name</label>
                     <input class="form-control" id="searchName" />
@@ -89,14 +89,14 @@
                     groceries.empty();
 
                     if (data.length == 0) {
-                        var currChild = $("<div>").appendTo(groceries).addClass("col-md-4");
+                        var currChild = $("<div>").appendTo(groceries).addClass('col-md-12');
                         $("<p>").appendTo(currChild).text("No results found.");
                     }
                     else {
                         for (var i = 0; i < data.length; i++) {
                             var currChild = $("<div>").appendTo(groceries).addClass("col-md-4");
                             currChild = $("<div>").appendTo(currChild).addClass("thumbnail");
-                            currChild = $("<a>").appendTo(currChild).prop("href", "/Home/Stock?groceryId=" + data[i].groceryId);
+                            currChild = $("<a>").appendTo(currChild).prop("href", "/Home/Stock/" + data[i].groceryId);
 
                             if (data[i].imageUrl == null || data[i].imageUrl == "") {
                                 $("<img>").appendTo(currChild).prop("src", "/images/imagenotavailable1-39de324.png").prop("alt", "Missing image").addClass("thumbnail-size");
@@ -131,6 +131,13 @@
                         }
                     }
                 }
+            }).fail(function () {
+                var groceries = $("#groceries");
+
+                groceries.empty();
+
+                var currChild = $("<div>").appendTo(groceries).addClass('col-md-12');
+                $("<p>").appendTo(currChild).text("An error occured while getting the list of available groceries").addClass('text-danger');
             });
         }
     </script>
