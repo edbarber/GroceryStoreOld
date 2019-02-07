@@ -84,7 +84,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             var result = await _userManager.DeleteAsync(user);
             if (!result.Succeeded)
             {
-                StatusMessage = $"Unexpected error occurred deleteing user with ID '{id}'.";
+                StatusMessage = $"Error: Unexpected error occurred deleteing user with ID '{id}'.";
                 return new JsonResult(string.Empty);
             }
 

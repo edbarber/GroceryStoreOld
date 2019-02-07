@@ -138,6 +138,11 @@
                             currChild = $('<button>').appendTo(currChild).addClass('btn btn-default pull-right').prop('title', 'Delete this role').prop('id', data[i].role.id).on('click', function () {
                                 return confirmDeleteAccount($(this).prop('id'));
                             });
+
+                            if (!data[i].allowDelete) {
+                                currChild.prop('disabled', true);
+                            }
+
                             $('<i>').appendTo(currChild).addClass('glyphicon glyphicon-trash');
                         }
                     }
@@ -159,7 +164,7 @@
                 bError = true;
             });
 
-            // Don't initialize again as doing so will cause errors (lack of gc collection in datatables plugin)
+            // Don't initialize again as doing so will cause errors (lack of gc in datatables plugin)
             if (!bDataTableInitialized) {
                 // check to see if every odd row (rows with class details-control) is half of the required page length for each page 
                 // as checking against all rows produces ugly results for this layout when there are an odd number of rows

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
@@ -20,19 +21,22 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<RolesModel> _logger;
+        private readonly IConfiguration _configuration; 
 
-        public RolesModel(ApplicationDbContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<RolesModel> logger)
+        public RolesModel(ApplicationDbContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<RolesModel> logger, IConfiguration configuration)
         {
             _context = context;
             _roleManager = roleManager;
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public class OutputModel
         {
             public ApplicationRole Role { get; set; }
+            public bool AllowDelete { get; set; }
             public List<ApplicationUser> Users { get; set; }
         }
 
@@ -54,6 +58,9 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 OutputModel outputModel = new OutputModel
                 {
                     Role = currRole,
+                    // admin should not be able to delete the admin role (this is needed to keep the integrity of the account database) 
+                    // set it here so we can disable button on front end if this is false
+                    AllowDelete = currRole.Name != _configuration.GetSection("AdminDefault").GetSection("Role").Value,
                     Users = GetUsers(currRole.Id)
                 };
 
@@ -77,6 +84,14 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 return new JsonResult(string.Empty);
             }
 
+            // check again if role can be deleted by admin (user shouldn't be able to remove disabled attribute from delete button)
+            // as we cannot persist the allow delete boolean without compromising security after page load
+            if (role.Name == _configuration.GetSection("AdminDefault").GetSection("Role").Value)
+            {
+                StatusMessage = $"Error: deleting the admin role is forbidden.";
+                return new JsonResult(string.Empty);
+            }
+
             var result = await _roleManager.DeleteAsync(role);
             if (!result.Succeeded)
             {
@@ -88,7 +103,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
             _logger.LogInformation($"Role with ID '{id}' deleted by admin.");
 
-            StatusMessage = $"Role(s) have been removed";
+            StatusMessage = $"Role have been removed";
 
             return new JsonResult(string.Empty);
         }
