@@ -71,9 +71,11 @@ namespace GroceryStore.Data
                 }
             }
 
-            if (await userManager.FindByNameAsync(userName) == null)
+            var user = await userManager.FindByNameAsync(userName);
+
+            if (user == null)
             {
-                var user = new ApplicationUser
+                user = new ApplicationUser
                 {
                     UserName = userName,
                     Email = email,
@@ -87,6 +89,7 @@ namespace GroceryStore.Data
                 if (result.Succeeded)
                 {
                     logger.LogInformation("Created admin account with password.");
+                    user = await userManager.FindByNameAsync(userName); // do it again as a new id was created for this user so we need to get the user info again
                 }
                 else
                 {
@@ -94,12 +97,37 @@ namespace GroceryStore.Data
 
                     return;
                 }
+            }
 
-                result = await userManager.AddToRoleAsync(user, defaultAdminRole);
+            var role = (from u in context.Users
+                        join ur in context.UserRoles on u.Id equals ur.UserId
+                        join r in context.Roles on ur.RoleId equals r.Id
+                        where u.Id == user.Id
+                        select r).FirstOrDefault();
+
+            if (role == null)
+            {
+                var result = await userManager.AddToRoleAsync(user, defaultAdminRole);
 
                 if (result.Succeeded)
                 {
                     logger.LogInformation("Admin role added to admin account.");
+                }
+                else
+                {
+                    LogErrors(result.Errors, logger);
+
+                    return;
+                }
+            }
+            else if (role.Name != defaultRole)
+            {
+                role.Name = defaultRole;
+                var result = await roleManager.UpdateAsync(role);
+
+                if (result.Succeeded)
+                {
+                    logger.LogInformation("Admin role updated to admin account.");
                 }
                 else
                 {

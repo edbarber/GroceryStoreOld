@@ -82,7 +82,7 @@
 
         function search(role, user) {
             $.ajax({
-                url: '@Url.Page("Roles")',
+                url: '@Url.Page("Roles", "Search")',
                 type: 'POST',
                 data: {
                     role: role,
@@ -116,22 +116,29 @@
                             });
 
                             currChild = $('<td>').appendTo(currChild);
-                            $('<span>').appendTo(currChild).addClass('details-control-open').after(data[i].role);
+                            $('<span>').appendTo(currChild).addClass('details-control-open').after(data[i].role.name);
 
                             currChild = $('<tr>').appendTo(body);
 
                             if (data[i].users.length > 0) {
                                 currChild = $('<td>').appendTo(currChild);
-                                currChild = $('<dl>').appendTo(currChild).addClass('dl-horizontal');
+                                currChild = $('<dl>').appendTo(currChild).addClass('dl-horizontal').prop('style', 'display:inline-block;');
                                 $('<dt>').appendTo(currChild).text('Associated Users');
 
                                 for (var j = 0; j < data[i].users.length; j++) {
                                     $('<dd>').appendTo(currChild).text(data[i].users[j].userName);
                                 }
+
+                                currChild = currChild.parent();
                             }
                             else {
-                                $('<td>').appendTo(currChild).text('There are no users associated with this role');
+                                currChild = $('<td>').appendTo(currChild).text('There are no users associated with this role');
                             }
+
+                            currChild = $('<button>').appendTo(currChild).addClass('btn btn-default pull-right').prop('title', 'Delete this role').prop('id', data[i].role.id).on('click', function () {
+                                return confirmDeleteAccount($(this).prop('id'));
+                            });
+                            $('<i>').appendTo(currChild).addClass('glyphicon glyphicon-trash');
                         }
                     }
                     else {
@@ -169,6 +176,29 @@
 
                 bDataTableInitialized = true;
             }
+        }
+
+        function confirmDeleteAccount(id) {
+            if (confirm('Are you sure you want to delete this role? The associated users will not have this role associated anymore unless another role is assigned to them.')) {
+                deleteAccount(id);
+            }
+        }
+
+        function deleteAccount(id) {
+            $.ajax({
+                url: '@Url.Page("Roles", "Delete")',
+                type: 'POST',
+                data: {
+                    id: id
+                },
+                headers: {
+                    RequestVerificationToken:
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (data) {
+                    window.location.replace(data);
+                }
+            });
         }
 
         function expandAll() {

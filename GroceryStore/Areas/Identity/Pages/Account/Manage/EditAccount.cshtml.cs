@@ -102,10 +102,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
             if (result.Succeeded)
             {
-                if (user.Id == _userManager.GetUserId(User))
-                {
-                    await _signInManager.RefreshSignInAsync(user);
-                }
+                await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
 
                 StatusMessage = "Profile has been updated";
                 return Redirect("./Accounts");

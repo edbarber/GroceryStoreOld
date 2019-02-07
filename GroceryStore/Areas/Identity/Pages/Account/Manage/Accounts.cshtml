@@ -47,7 +47,7 @@
                         <td>@item.Role</td>
                         <td>
                             <div class="dropdown">
-                                <a class="dropdown-toggle" data-toggle="dropdown" style="color:#333;"><i class="glyphicon glyphicon-option-vertical"></i></a>
+                                <a class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-option-vertical"></i></a>
                                 <ul class="dropdown-menu dropdown-menu-right">
                                     <li><a asp-page="./EditAccount" asp-route-id="@item.Id">Edit</a></li>
                                     <li><a asp-page="./EditAccountPassword" asp-route-id="@item.Id" asp-route-returnURL="./Accounts">Update Password</a></li>
@@ -117,7 +117,7 @@
 
         function deleteAccount(id) {
             $.ajax({
-                url: '@Url.Page("Accounts")',
+                url: '@Url.Page("Accounts", "Delete")',
                 type: 'POST',
                 data: {
                     id: id

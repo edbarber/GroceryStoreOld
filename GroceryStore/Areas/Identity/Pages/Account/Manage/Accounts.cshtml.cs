@@ -67,7 +67,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(string id)
+        public async Task<IActionResult> OnPostDeleteAsync(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)

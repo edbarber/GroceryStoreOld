@@ -93,10 +93,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            if (user.Id == _userManager.GetUserId(User))
-            {
-                await _signInManager.RefreshSignInAsync(user);
-            }
+            await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
 
             _logger.LogInformation($"Admin changed user {id} password successfully.");
             StatusMessage = "Password has been changed";

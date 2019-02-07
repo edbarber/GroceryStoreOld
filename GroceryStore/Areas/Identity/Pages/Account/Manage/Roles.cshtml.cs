@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using GroceryStore.Data;
 using GroceryStore.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 {
@@ -14,43 +16,30 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
     public class RolesModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<RolesModel> _logger;
 
-        public RolesModel(ApplicationDbContext context)
+        public RolesModel(ApplicationDbContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<RolesModel> logger)
         {
             _context = context;
+            _roleManager = roleManager;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _logger = logger;
         }
 
         public class OutputModel
         {
-            public string Role { get; set; }
+            public ApplicationRole Role { get; set; }
             public List<ApplicationUser> Users { get; set; }
         }
 
         [TempData]
         public string StatusMessage { get; set; }
 
-        public List<OutputModel> RolesAndUsers { get; set; }
-
-        public IActionResult OnGet()
-        {
-            List<OutputModel> output = new List<OutputModel>();
-            List<ApplicationRole> roles = _context.Roles.ToList();
-
-            foreach (ApplicationRole role in roles)
-            {
-                output.Add(new OutputModel
-                {
-                    Role = role.Name,
-                    Users = GetUsers(role.Id)
-                });
-            }
-
-            RolesAndUsers = output;
-
-            return Page();
-        }
-
-        public IActionResult OnPost(string role, string user)
+        public IActionResult OnPostSearch(string role, string user)
         {
             List<OutputModel> output = new List<OutputModel>();
             List<ApplicationRole> roles = _context.Roles.ToList();
@@ -64,7 +53,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             {
                 OutputModel outputModel = new OutputModel
                 {
-                    Role = currRole.Name,
+                    Role = currRole,
                     Users = GetUsers(currRole.Id)
                 };
 
@@ -77,6 +66,31 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             }
 
             return new JsonResult(output);
+        }
+
+        public async Task<IActionResult> OnPostDeleteAsync(string id)
+        {
+            var role = await _roleManager.FindByIdAsync(id);
+            if (role == null)
+            {
+                StatusMessage = $"Unable to load role with ID '{id}'.";
+                return new JsonResult(string.Empty);
+            }
+
+            var result = await _roleManager.DeleteAsync(role);
+            if (!result.Succeeded)
+            {
+                StatusMessage = $"Unexpected error occurred deleteing role with ID '{id}'.";
+
+                return new JsonResult(string.Empty);
+            }
+
+            await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
+            _logger.LogInformation($"Role with ID '{id}' deleted by admin.");
+
+            StatusMessage = $"Role(s) have been removed";
+
+            return new JsonResult(string.Empty);
         }
 
         private List<ApplicationUser> GetUsers(string roleId)
