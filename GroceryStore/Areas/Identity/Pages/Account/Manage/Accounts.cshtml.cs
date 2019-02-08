@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = "Admin")]
     public class AccountsModel : PageModel
     {
         private readonly ApplicationDbContext _context;
