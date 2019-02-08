@@ -129,7 +129,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
 
                 StatusMessage = "Profile has been updated";
-                return Redirect("./Accounts");
+                return RedirectToPage("./Accounts");
             }
             else
             {

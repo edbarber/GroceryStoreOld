@@ -135,12 +135,21 @@
                                 currChild = $('<td>').appendTo(currChild).text('There are no users associated with this role');
                             }
 
-                            currChild = $('<button>').appendTo(currChild).addClass('btn btn-default pull-right').prop('title', 'Delete this role').prop('id', data[i].role.id).on('click', function () {
-                                return confirmDeleteAccount($(this).prop('id'));
+                            currChild = $('<div>').appendTo(currChild).addClass('pull-right');
+                            currChild = $('<button>').appendTo(currChild).addClass('btn btn-default').prop('title', 'Edit this role').prop('id', 'edit_' + data[i].role.id).prop('style', 'margin-right:5px;').on('click', function () {
+                                return confirmEditRole($(this).prop('id').split('_')[1]);
+                            });
+                            $('<i>').appendTo(currChild).addClass('glyphicon glyphicon-pencil');
+
+                            currChild = currChild.parent();
+
+                            currChild = $('<button>').appendTo(currChild).addClass('btn btn-default').prop('title', 'Delete this role').prop('id', 'delete_' + data[i].role.id).on('click', function () {
+                                return confirmDeleteRole($(this).prop('id').split('_')[1]);
                             });
 
-                            if (!data[i].allowDelete) {
+                            if (!data[i].allowEditAndDelete) {
                                 currChild.prop('disabled', true);
+                                currChild.prev().prop('disabled', true);
                             }
 
                             $('<i>').appendTo(currChild).addClass('glyphicon glyphicon-trash');
@@ -183,13 +192,19 @@
             }
         }
 
-        function confirmDeleteAccount(id) {
-            if (confirm('Are you sure you want to delete this role? The associated users will not have this role associated anymore unless another role is assigned to them.')) {
-                deleteAccount(id);
+        function confirmEditRole(id) {
+            if (confirm('Are you sure you want to edit this role? The associated users will have their role changed to the role that\'s going to be updated with it.')) {
+                window.location.replace('./EditRole?id=' + id);
             }
         }
 
-        function deleteAccount(id) {
+        function confirmDeleteRole(id) {
+            if (confirm('Are you sure you want to delete this role? The associated users will not have this role associated anymore unless another role is assigned to them.')) {
+                deleteRole(id);
+            }
+        }
+
+        function deleteRole(id) {
             $.ajax({
                 url: '@Url.Page("Roles", "Delete")',
                 type: 'POST',

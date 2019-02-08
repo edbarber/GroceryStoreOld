@@ -36,7 +36,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         public class OutputModel
         {
             public ApplicationRole Role { get; set; }
-            public bool AllowDelete { get; set; }
+            public bool AllowEditAndDelete { get; set; }
             public List<ApplicationUser> Users { get; set; }
         }
 
@@ -60,7 +60,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                     Role = currRole,
                     // admin should not be able to delete the admin role (this is needed to keep the integrity of the account database) 
                     // set it here so we can disable button on front end if this is false
-                    AllowDelete = currRole.Name != _configuration.GetSection("AdminDefault").GetSection("Role").Value,
+                    AllowEditAndDelete = currRole.Name != _configuration.GetSection("AdminRole").Value,
                     Users = GetUsers(currRole.Id)
                 };
 
@@ -86,7 +86,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
             // check again if role can be deleted by admin (user shouldn't be able to remove disabled attribute from delete button)
             // as we cannot persist the allow delete boolean without compromising security after page load
-            if (role.Name == _configuration.GetSection("AdminDefault").GetSection("Role").Value)
+            if (role.Name == _configuration.GetSection("AdminRole").Value)
             {
                 StatusMessage = $"Error: deleting the admin role is forbidden.";
                 return new JsonResult(string.Empty);
