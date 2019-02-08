@@ -168,7 +168,7 @@
                 body.empty();
 
                 var currChild = $('<tr>').appendTo(body);
-                $('<td>').appendTo(currChild).text('An error has occured while getting the roles. Try refreshing the page or coming back later.').addClass('text-danger');
+                $('<td>').appendTo(currChild).text('An error has occured while getting the roles.').addClass('text-danger');
 
                 bError = true;
             });
@@ -239,7 +239,13 @@
 
         function collapseAll() {
             if (!bError) {
-                $('#roleTable > tbody > tr').each(function (index, element) {
+                var rows = $('#roleTable > tbody > tr');
+
+                if (rows.length <= 1) {
+                    return; // don't bother collapsing (only one row will collapse, which produces ugly results)
+                }
+
+                rows.each(function (index, element) {
                     var child = $(element).children()[0].children[0];
 
                     if ($(element).hasClass('details-control')) {

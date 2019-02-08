@@ -88,7 +88,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             // as we cannot persist the allow delete boolean without compromising security after page load
             if (role.Name == _configuration.GetSection("AdminRole").Value)
             {
-                StatusMessage = $"Error: deleting the admin role is forbidden.";
+                StatusMessage = $"Error: deleting this admin role is forbidden.";
                 return new JsonResult(string.Empty);
             }
 

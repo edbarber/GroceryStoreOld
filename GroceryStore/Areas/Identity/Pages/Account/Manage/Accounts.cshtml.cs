@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
@@ -20,6 +21,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<AccountsModel> _logger;
+        private readonly IConfiguration _configuration;
 
         [TempData]
         public string StatusMessage { get; set; }
@@ -34,14 +36,16 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             public string Role { get; set; }
             public string Id { get; set; }
             public bool IdSelected { get; set; }
+            public bool DeleteDisabled { get; set; }    
         }
 
-        public AccountsModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<AccountsModel> logger, SignInManager<ApplicationUser> signInManager)
+        public AccountsModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<AccountsModel> logger, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
             _logger = logger;
             _signInManager = signInManager;
+            _configuration = configuration;
         }
 
         public List<OutputModel> Users { get; set; }
@@ -61,7 +65,8 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                         Email = u.Email,
                         PhoneNumber = u.PhoneNumber ?? "N/A",
                         Role = rItem.Name ?? "N/A",
-                        Id = u.Id
+                        Id = u.Id,
+                        DeleteDisabled = u.UserName == _configuration.GetSection("AdminDefault").GetSection("UserName").Value
                     }).ToList();
 
             return Page();
@@ -73,6 +78,12 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             if (user == null)
             {
                 StatusMessage = $"Unable to load user with ID '{id}'.";
+                return new JsonResult(string.Empty);
+            }
+
+            if (user.UserName == _configuration.GetSection("AdminDefault").GetSection("UserName").Value)
+            {
+                StatusMessage = $"Error: deleting this admin account is forbidden.";
                 return new JsonResult(string.Empty);
             }
 

@@ -51,7 +51,14 @@
                                 <ul class="dropdown-menu dropdown-menu-right">
                                     <li><a asp-page="./EditAccount" asp-route-id="@item.Id">Edit</a></li>
                                     <li><a asp-page="./EditAccountPassword" asp-route-id="@item.Id" asp-route-returnURL="./Accounts">Update Password</a></li>
-                                    <li><a href="#" id="@item.Id" onclick="return confirmDeleteAccount(id)">Delete</a></li>
+                                    @if (!item.DeleteDisabled)
+                                    {
+                                        <li><a href="#" id="@item.Id" onclick="return confirmDeleteAccount(id)">Delete</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li class="disabled"><a href="#" class="link-disabled">Delete</a></li>
+                                    }
                                 </ul>
                             </div>
                         </td>

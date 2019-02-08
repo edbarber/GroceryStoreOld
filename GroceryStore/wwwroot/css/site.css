@@ -97,6 +97,13 @@ span.details-control-collapsed::before {
     color: #41b941;
 }
 
+/* make sure it's a link */
+a.link-disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    text-decoration: none;
+}
+
 .hidden {
     display: none;
 }
