@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 {
@@ -17,15 +18,18 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _configuration;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         public bool IsEmailConfirmed { get; set; }
@@ -35,6 +39,8 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
         [BindProperty]
         public InputModel Input { get; set; }
+
+        public bool AllowUsernameEdit { get; set; }
 
         public class InputModel
         {
@@ -76,6 +82,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 UserName = user.UserName
             };
 
+            AllowUsernameEdit = user.UserName != _configuration.GetSection("AdminDefault").GetSection("UserName").Value;
             IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
 
             return Page();
@@ -83,18 +90,31 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            user.UserName = Input.UserName;
+            // reset it as it didn't persist after page load 
+            AllowUsernameEdit = user.UserName != _configuration.GetSection("AdminDefault").GetSection("UserName").Value;
+
+            if (!AllowUsernameEdit && Input.UserName != user.UserName)
+            {
+                ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.UserName)}", "The Username field cannot be edited.");
+                return Page();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            if (AllowUsernameEdit)
+            {
+                user.UserName = Input.UserName;
+            }
+
             user.Email = Input.Email;
             user.PhoneNumber = Input.PhoneNumber;
             user.FirstName = Input.FirstName;

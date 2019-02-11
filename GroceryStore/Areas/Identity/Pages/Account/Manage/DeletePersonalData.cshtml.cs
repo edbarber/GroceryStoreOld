@@ -5,6 +5,7 @@ using GroceryStore.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
@@ -14,16 +15,22 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
+        private readonly IConfiguration _configuration;
 
         public DeletePersonalDataModel(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<DeletePersonalDataModel> logger)
+            ILogger<DeletePersonalDataModel> logger,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _configuration = configuration;
         }
+
+        [TempData]
+        public string StatusMessage { get; set; }
 
         [BindProperty]
         public InputModel Input { get; set; }
@@ -45,6 +52,12 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
+            if (user.UserName == _configuration.GetSection("AdminDefault").GetSection("UserName").Value)
+            {
+                StatusMessage = "Error: Deleting this admin is forbidden!";
+                return RedirectToPage("./PersonalData");
+            }
+
             RequirePassword = await _userManager.HasPasswordAsync(user);
             return Page();
         }
@@ -55,6 +68,13 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            // prevent doing an ajax call to bypass deletion on post
+            if (user.UserName == _configuration.GetSection("AdminDefault").GetSection("UserName").Value)
+            {
+                StatusMessage = "Error: Deleting this admin is forbidden!";
+                return RedirectToPage("./PersonalData");
             }
 
             RequirePassword = await _userManager.HasPasswordAsync(user);
