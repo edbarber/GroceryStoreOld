@@ -147,37 +147,6 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            IdentityResult result;
-
-            if (roleToRemove != null)
-            {
-                result = await _userManager.RemoveFromRoleAsync(user, roleToRemove.Name);
-
-                if (!result.Succeeded)
-                {
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-
-                    return Page();  // don't bother continuing
-                }
-            }
-
-            var roleToAddTo = await _roleManager.FindByIdAsync(Input.SelectedRoleId);
-            result = await _userManager.AddToRoleAsync(user, roleToAddTo.Name);
-
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-
-                await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
-                return Page();  // don't bother continuing
-            }
-
             if (AllowUsernameAndRoleEdit)
             {
                 user.UserName = Input.UserName;
@@ -188,14 +157,11 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
 
-            result = await _userManager.UpdateAsync(user);
+            var result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
             {
                 await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
-
-                StatusMessage = "Profile has been updated";
-                return RedirectToPage("./Accounts");
             }
             else
             {
@@ -204,7 +170,46 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
 
-                return Page();  
+                return Page();  // don't bother continuing
+            }
+
+            if (roleToRemove != null)
+            {
+                result = await _userManager.RemoveFromRoleAsync(user, roleToRemove.Name);
+
+                if (!result.Succeeded)
+                {
+                    StatusMessage = $"Error: Profile has been updated, however, the role wasn't updated. Please try editing the role for this user again.";
+                    return RedirectToPage("./EditAccount", new { id = user.Id });
+                }
+                else
+                {
+                    await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
+                }
+            }
+
+            var roleToAddTo = await _roleManager.FindByIdAsync(Input.SelectedRoleId);
+            string roleError = string.Empty;
+
+            try
+            {
+                result = await _userManager.AddToRoleAsync(user, roleToAddTo.Name);
+            }
+            catch 
+            {
+                roleError = "Critical Error!";
+            }
+
+            if (roleError != string.Empty || !result.Succeeded)
+            {
+                StatusMessage = $"Error: {roleError} Profile has been updated, however, the role doesn't exist anymore. Please try updating the role for this user.";
+                return RedirectToPage("./EditAccount", new { id = user.Id });
+            }
+            else
+            {
+                StatusMessage = $"Profile {user.UserName} has been updated successfully!";
+                await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
+                return RedirectToPage("./Accounts");
             }
         }
     }

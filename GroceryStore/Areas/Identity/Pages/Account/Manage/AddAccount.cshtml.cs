@@ -117,9 +117,9 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                     {
                         result = await _userManager.AddToRoleAsync(user, roleToAddTo?.Name);
                     }
-                    catch (Exception ex)
+                    catch 
                     {
-                        roleError = ex.GetBaseException().Message;
+                        roleError = "Critical error!";
                     }
 
                     if (result.Succeeded && roleError == string.Empty)
