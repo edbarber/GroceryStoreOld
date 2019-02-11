@@ -103,7 +103,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
         private IActionResult SetAndCheckForbidden(string roleName)
         {
-            // this can change between get and post as the app settings json file can be edited during runtime
+            // doing this in both get and post prevents ajax calls from bypassing edit
             AllowRoleEdit = roleName != _configuration.GetSection("AdminRole").Value;
 
             if (!AllowRoleEdit)
