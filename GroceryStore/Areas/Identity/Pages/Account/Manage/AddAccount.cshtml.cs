@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
@@ -21,13 +23,15 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ILogger<AddAccountModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _configuration;
 
-        public AddAccountModel(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ILogger<AddAccountModel> logger, IEmailSender emailSender)
+        public AddAccountModel(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, ILogger<AddAccountModel> logger, IEmailSender emailSender, IConfiguration configuration)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _logger = logger;
             _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         [TempData]
@@ -35,6 +39,8 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
         [BindProperty]
         public InputModel Input { get; set; }
+
+        public List<SelectListItem> Roles { get; set; }
 
         public class InputModel
         {
@@ -49,6 +55,10 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             [Required]
             [Display(Name = "Username")]
             public string UserName { get; set; }
+
+            [Required]
+            [Display(Name = "Role")]
+            public string SelectedRoleId { get; set; }
 
             [Display(Name = "Phone number")]
             [Phone]
@@ -71,9 +81,14 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             public string ConfirmPassword { get; set; }
         }
 
-        public IActionResult OnGet()
+        public async void OnGetAsync()
         {
-            return Page();
+            Roles = _roleManager.Roles.OrderBy(ar => ar.Name).Select(ar => new SelectListItem(ar.Name, ar.Id)).ToList();
+
+            Input = new InputModel
+            {
+                SelectedRoleId = (await _roleManager.FindByNameAsync(_configuration.GetSection("DefaultRole").Value))?.Id
+            };
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -90,29 +105,37 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
-                List<IdentityError> errors = new List<IdentityError>();
+                string roleError = string.Empty;
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("Admin created a new account with password.");
 
-                    result = await _userManager.AddToRoleAsync(user, "User");
+                    var roleToAddTo = await _roleManager.FindByIdAsync(Input.SelectedRoleId);
 
-                    if (result.Succeeded)
+                    try
                     {
-                        _logger.LogInformation("User role added to user account.");
+                        result = await _userManager.AddToRoleAsync(user, roleToAddTo?.Name);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        errors.AddRange(result.Errors);
+                        roleError = ex.GetBaseException().Message;
+                    }
+
+                    if (result.Succeeded && roleError == string.Empty)
+                    {
+                        _logger.LogInformation($"{roleToAddTo.Name} role added to user account.");
                     }
                 }
                 else
                 {
-                    errors.AddRange(result.Errors);
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
 
-                if (errors.Count == 0)
+                if (await _userManager.FindByNameAsync(user.UserName) != null)
                 {
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     var callbackUrl = Url.Page(
@@ -124,15 +147,21 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-                    StatusMessage = "Profile has been added";
+                    if (roleError == string.Empty && result.Succeeded)
+                    {
+                        StatusMessage = "Profile has been added";
+                    }
+                    else
+                    {
+                        StatusMessage = $"Error: {roleError} You will need to reassign the role to user {user.UserName}";
+                    }
+
                     return Redirect("./Accounts");
                 }
-
-                foreach (var error in errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
             }
+
+            // Roles need to be repopulated
+            Roles = _roleManager.Roles.OrderBy(ar => ar.Name).Select(ar => new SelectListItem(ar.Name, ar.Id)).ToList();
 
             return Page();
         }
