@@ -27,7 +27,8 @@ namespace GroceryStore.Data
                           UserManager<ApplicationUser> userManager,
                           RoleManager<ApplicationRole> roleManager,
                           IConfiguration configuration,
-                          ILogger<RegisterModel> logger)
+                          ILogger<RegisterModel> logger, 
+                          DbCommonFunctionality dbCommonFunctionality)
         {
             context.Database.EnsureCreated();
 
@@ -109,11 +110,7 @@ namespace GroceryStore.Data
             }
 
             // find current role associated to default admin
-            var role = (from u in context.Users
-                        join ur in context.UserRoles on u.Id equals ur.UserId
-                        join r in context.Roles on ur.RoleId equals r.Id
-                        where u.Id == user.Id
-                        select r).FirstOrDefault();
+            var role = dbCommonFunctionality.GetRoleForUser(user.Id);
 
             // if role is incorrect
             if (role != null && role.Name != adminRole)

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using GroceryStore.Data;
 using GroceryStore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
@@ -18,12 +20,16 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly DbCommonFunctionality _dbCommonFunctionality;
 
-        public EditAccountModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
-        {
+        public EditAccountModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, RoleManager<ApplicationRole> roleManager, ApplicationDbContext context, DbCommonFunctionality dbCommonFunctionality)
+        {               
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _roleManager = roleManager;
+            _dbCommonFunctionality = dbCommonFunctionality;
         }
 
         [TempData]
@@ -32,7 +38,9 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public InputModel Input { get; set; }
 
-        public bool AllowUsernameEdit { get; set; }
+        public bool AllowUsernameAndRoleEdit { get; set; }
+        public bool AllowRoleEdit { get; set; }
+        public List<SelectListItem> Roles { get; set; }
 
         public class InputModel
         {
@@ -47,6 +55,10 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             [Required]
             [Display(Name = "Username")]
             public string UserName { get; set; }
+
+            [Required]
+            [Display(Name = "Role")]
+            public string SelectedRoleId { get; set; }
 
             [Required]
             [EmailAddress]
@@ -72,15 +84,18 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 PhoneNumber = user.PhoneNumber,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                UserName = user.UserName
+                UserName = user.UserName,
+                SelectedRoleId = _dbCommonFunctionality.GetRoleForUser(id)?.Id
             };
+
+            Roles = _roleManager.Roles.OrderBy(ar => ar.Name).Select(ar => new SelectListItem(ar.Name, ar.Id)).ToList();
 
             ViewData["User"] = user.UserName;
             ViewData["Id"] = user.Id;
 
             // admin should not be able to edit its default username (this is needed to keep the integrity of the account database) 
             // set it here so we can disable text box on front end if this is false
-            AllowUsernameEdit = user.UserName != _configuration.GetSection("AdminDefault").GetSection("UserName").Value;
+            AllowUsernameAndRoleEdit = user.UserName != _configuration.GetSection("AdminDefault").GetSection("UserName").Value;
 
             return Page();
         }
@@ -97,14 +112,34 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             ViewData["Id"] = user.Id;
 
             // set it again as we don't want to expose this on the front end (user can change) and this gets set back to false alone after page is loaded
-            AllowUsernameEdit = user.UserName != _configuration.GetSection("AdminDefault").GetSection("UserName").Value;
+            AllowUsernameAndRoleEdit = user.UserName != _configuration.GetSection("AdminDefault").GetSection("UserName").Value;
 
-            if (!AllowUsernameEdit && Input.UserName != user.UserName)
+            // list gets cleared after page load so recreate it
+            Roles = _roleManager.Roles.OrderBy(ar => ar.Name).Select(ar => new SelectListItem(ar.Name, ar.Id)).ToList();
+
+            var roleToRemove = _dbCommonFunctionality.GetRoleForUser(user.Id);
+
+            if (!AllowUsernameAndRoleEdit)
             {
-                StatusMessage = "Error: editing the username for this admin is forbidden";
-                ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.UserName)}", "The Username field cannot be edited.");
+                bool error = false; // flag to check if there has been an error (want to output all errors incase first if statement validates as true)
 
-                return Page();
+                if (Input.UserName != user.UserName)
+                {
+                    ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.UserName)}", "The Username field cannot be edited.");
+                    error = true;
+                }
+
+                if (Input.SelectedRoleId != roleToRemove?.Id)
+                {
+                    ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.SelectedRoleId)}", "The role cannot be selected.");
+                    error = true;
+                }
+
+                if (error)
+                {
+                    StatusMessage = "Critical error happened! Please check messages below.";
+                    return Page();
+                }
             }
 
             if (!ModelState.IsValid)
@@ -112,7 +147,38 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            if (AllowUsernameEdit)
+            IdentityResult result;
+
+            if (roleToRemove != null)
+            {
+                result = await _userManager.RemoveFromRoleAsync(user, roleToRemove.Name);
+
+                if (!result.Succeeded)
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+
+                    return Page();  // don't bother continuing
+                }
+            }
+
+            var roleToAddTo = await _roleManager.FindByIdAsync(Input.SelectedRoleId);
+            result = await _userManager.AddToRoleAsync(user, roleToAddTo.Name);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
+                return Page();  // don't bother continuing
+            }
+
+            if (AllowUsernameAndRoleEdit)
             {
                 user.UserName = Input.UserName;
             }
@@ -122,7 +188,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
 
-            var result = await _userManager.UpdateAsync(user);
+            result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
             {
@@ -138,7 +204,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
 
-                return Page();
+                return Page();  
             }
         }
     }

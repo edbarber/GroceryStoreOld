@@ -52,6 +52,14 @@ namespace GroceryStore
                 options.UseSqlServer(
                     Configuration.GetConnectionString("AccountConnection")));
 
+            // inject custom class for common db functionality 
+            // -----------------------------------------------------------
+            DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            optionsBuilder.UseSqlServer(Configuration.GetConnectionString("AccountConnection"));
+
+            services.AddSingleton(new DbCommonFunctionality(optionsBuilder.Options));
+            // -----------------------------------------------------------
+
             // Use add identity instead and added add default ui with add default token providers due to bug in 
             // asp.net core 2.1 with checking what role current logged in user belongs to
             services.AddIdentity<ApplicationUser, ApplicationRole>()
@@ -76,7 +84,8 @@ namespace GroceryStore
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext context,
-            RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, ILogger<RegisterModel> logger)
+            RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, ILogger<RegisterModel> logger, 
+            DbCommonFunctionality dbCommonFunctionality)
         {
             if (env.IsDevelopment())
             {
@@ -102,7 +111,7 @@ namespace GroceryStore
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            SeedData.Initialize(context, userManager, roleManager, Configuration, logger).Wait();
+            SeedData.Initialize(context, userManager, roleManager, Configuration, logger, dbCommonFunctionality).Wait();
         }
     }
 }
