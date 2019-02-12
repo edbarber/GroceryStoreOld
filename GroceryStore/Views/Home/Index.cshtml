@@ -71,6 +71,9 @@
             </div>
         </div>
     }
+    <div class="col-md-12 hidden" id="searchResults">
+        <p>There are no results to show.</p>
+    </div>
 }
 else
 {
@@ -117,7 +120,11 @@ else
         });
 
         function search(name, price, weight, conversionCode) {
-            $('#groceries > .col-md-4').each(function (index, element) {
+
+            var elements = $('#groceries > .col-md-4');
+            var hiddenCount = 0;
+
+            elements.each(function (index, element) {
                 var included = true;
                 var captionElement = $(element).children('.thumbnail').children('.caption').first();
                 var text = "";
@@ -155,11 +162,24 @@ else
                     if (!$(element).hasClass('hidden')) {
                         $(element).addClass('hidden');
                     }
+
+                    hiddenCount++;
                 }
                 else {
                     $(element).removeClass('hidden');
                 }
             });
+
+            var element = $('#searchResults');
+
+            if (elements.length == hiddenCount) {
+                element.removeClass('hidden');
+            }
+            else {
+                if (!element.hasClass('hidden')) {
+                    element.addClass('hidden');
+                }
+            }
         }
 
         function compareString(value, compareTo) {
