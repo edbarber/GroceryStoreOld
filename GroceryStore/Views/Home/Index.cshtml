@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<Grocery>
+@{
     ViewData["Title"] = "Groceries";
 }
 
@@ -29,13 +30,59 @@
         </div>
     </div>
 </div>
-<div class="row" id="groceries"></div>
+<div class="row" id="groceries">
+@if (Model.Count() > 0)
+{
+    foreach (var item in Model)
+    {
+        <div class="col-md-4">
+            <div class="thumbnail">
+                <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId">
+                @if (string.IsNullOrWhiteSpace(item.ImageUrl))
+                {
+                    <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" class="thumbnail-size" />
+                }
+                else
+                {
+                    <img src="@item.ImageUrl" alt="@item.ImageAlt" class="thumbnail-size" />
+                }
+                </a>
+                <div class="caption">
+                    <h3 class="name">@item.Name</h3>
+                    <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" class="btn btn-primary" style="width:100px;">Stock</a>
+                    @if (item.Conversion != null)
+                    {
+                        <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span> per <span class="weight">@string.Format("{0:G29}", item.Weight)</span><span class="conversionCode">@item.Conversion.Code</span></p>
+                    }
+                    else
+                    {
+                        <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span></p>
+                    }
+
+                    @if (string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <p>N/A</p>
+                    }
+                    else
+                    {
+                        <p>@item.Description</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="col-md-12">
+        <p>There are no items to show.</p>
+    </div>
+}
+</div>
 
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            search('', '', '', '');
-
             $('#searchName').on('keyup', function () {
                 search($(this).val(), $('#searchPrice').val(), $('#searchWeight').val(), $('#searchConversionCode').val());
             });
@@ -70,75 +117,57 @@
         });
 
         function search(name, price, weight, conversionCode) {
-            $.ajax({
-                url: '@Url.Action("Search", "Home")',
-                type: 'POST',
-                data: {
-                    name: name,
-                    price: price,
-                    weight: weight,
-                    conversionCode: conversionCode
-                },
-                headers: {
-                    RequestVerificationToken:
-                        $('input:hidden[name="__RequestVerificationToken"]').val()
-                },
-                success: function (data) {
-                    var groceries = $("#groceries");
+            $('#groceries > .col-md-4').each(function (index, element) {
+                var included = true;
+                var captionElement = $(element).children('.thumbnail').children('.caption').first();
+                var text = "";
 
-                    groceries.empty();
+                text = captionElement.children('.name').first().text();
+                included = compareString(text, name);
 
-                    if (data.length == 0) {
-                        var currChild = $("<div>").appendTo(groceries).addClass('col-md-12');
-                        $("<p>").appendTo(currChild).text("No results found.");
-                    }
-                    else {
-                        for (var i = 0; i < data.length; i++) {
-                            var currChild = $("<div>").appendTo(groceries).addClass("col-md-4");
-                            currChild = $("<div>").appendTo(currChild).addClass("thumbnail");
-                            currChild = $("<a>").appendTo(currChild).prop("href", "/Home/Stock/" + data[i].groceryId);
+                // don't bother comparing again if it's not included
+                if (included) {
+                    text = captionElement.children('p').first().children('.price').first().text();
+                    included = compareString(text, price);
+                }
 
-                            if (data[i].imageUrl == null || data[i].imageUrl == "") {
-                                $("<img>").appendTo(currChild).prop("src", "/images/imagenotavailable1-39de324.png").prop("alt", "Missing image").addClass("thumbnail-size");
-                            }
-                            else {
-                                $("<img>").appendTo(currChild).prop("src", data[i].imageUrl).prop("alt", data[i].imageAlt).addClass("thumbnail-size");
-                            }
+                if (included) {
+                    var weightSpan = captionElement.children('p').first().children('.weight');
 
-                            currChild = $("#groceries").children()[i].children[0];
-                            currChild = $("<div>").appendTo(currChild).addClass("caption");
-
-                            $("<h3>").appendTo(currChild).text(data[i].name);
-                            $("<a>").appendTo(currChild).prop("href", "/Home/Stock/" + data[i].groceryId).addClass("btn btn-primary").prop("style", "width:100px;").text("Stock");
-
-                            var weight;
-
-                            if (data[i].weight == null) {
-                                weight = "";
-                            }
-                            else {
-                                weight = data[i].weight;
-                            }
-
-                            $("<p>").appendTo(currChild).addClass("font-weight-bold").text(currencyFormatter.format(data[i].price) + " per " + weight + " " + data[i].conversion.code);
-
-                            if (data[i].description != null && data[i].description != "") {
-                                $("<p>").appendTo(currChild).text(data[i].description);
-                            }
-                            else {
-                                $("<p>").appendTo(currChild).text("N/A");
-                            }
-                        }
+                    // weight needs to exist as weight can possibly not exist
+                    if (weightSpan.length > 0) {
+                        text = weightSpan.first().text();
+                        included = compareString(text, weight);
                     }
                 }
-            }).fail(function () {
-                var groceries = $("#groceries");
 
-                groceries.empty();
+                if (included) {
+                    var conversionCodeSpan = captionElement.children('p').first().children('.conversionCode');
 
-                var currChild = $("<div>").appendTo(groceries).addClass('col-md-12');
-                $("<p>").appendTo(currChild).text("An error occured while getting the list of available groceries").addClass('text-danger');
+                    // conversion code needs to exist as conversion code can possibly not exist
+                    if (conversionCodeSpan.length > 0) {
+                        text = conversionCodeSpan.first().text();
+                        included = compareString(text, conversionCode);
+                    }
+                }
+
+                if (!included) {
+                    if (!$(element).hasClass('hidden')) {
+                        $(element).addClass('hidden');
+                    }
+                }
+                else {
+                    $(element).removeClass('hidden');
+                }
             });
+        }
+
+        function compareString(value, compareTo) {
+            if (value.toLowerCase().includes(compareTo)) {
+                return true;
+            }
+
+            return false;
         }
     </script>
 }

@@ -20,36 +20,8 @@ namespace GroceryStore.Controllers
 
         public IActionResult Index()
         {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Search(string name, string price, string weight, string conversionCode)
-        {
             IEnumerable<Grocery> groceryStoreContext = _context.Grocery.Include(g => g.Conversion);
-
-            if (!string.IsNullOrWhiteSpace(name))
-            {
-                groceryStoreContext = groceryStoreContext.Where(g => g.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(price))
-            {
-                groceryStoreContext = groceryStoreContext.Where(g => g.Price.ToString().Contains(price, StringComparison.CurrentCultureIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(weight))
-            {
-                groceryStoreContext = groceryStoreContext.Where(g => g.Weight.ToString().Contains(weight, StringComparison.CurrentCultureIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(conversionCode))
-            {
-                groceryStoreContext = groceryStoreContext.Where(g => g.Conversion.Code.Contains(conversionCode, StringComparison.CurrentCultureIgnoreCase));
-            }
-
-            return Json(groceryStoreContext);
+            return View(groceryStoreContext);
         }
 
         public async Task<IActionResult> Stock(int id)
