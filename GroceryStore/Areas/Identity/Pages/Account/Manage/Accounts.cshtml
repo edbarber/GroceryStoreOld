@@ -36,8 +36,15 @@
                 {
                     <tr>
                         <td>
+                        @if (!item.DeleteDisabled)
+                        {
                             <input asp-for="@item.IdSelected" type="checkbox" class="idSelector" />
                             <input asp-for="@item.Id" type="hidden" class="idValue" />
+                        }
+                        else
+                        {
+                            <input type="checkbox" disabled />
+                        }
                         </td>
                         <td>@item.Username</td>
                         <td>@item.FirstName</td>
