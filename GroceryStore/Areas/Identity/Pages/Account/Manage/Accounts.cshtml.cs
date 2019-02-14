@@ -72,19 +72,21 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             return Page();
         }
 
-        public async Task<IActionResult> OnPostDeleteAsync(string id)
+        public async Task<JsonResult> OnPostDeleteAsync(string id)
         {
+            JsonResult page = new JsonResult(Url.Page("Accounts"));
+
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
                 StatusMessage = $"Unable to load user with ID '{id}'.";
-                return new JsonResult(string.Empty);
+                return page;
             }
 
             if (user.UserName == _configuration.GetSection("AdminDefault").GetSection("UserName").Value)
             {
                 StatusMessage = $"Error: deleting this admin account is forbidden.";
-                return new JsonResult(string.Empty);
+                return page;
             }
 
             if (user.Id == _userManager.GetUserId(User))
@@ -96,13 +98,13 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             if (!result.Succeeded)
             {
                 StatusMessage = $"Error: Unexpected error occurred deleteing user with ID '{id}'.";
-                return new JsonResult(string.Empty);
+                return page;
             }
 
             _logger.LogInformation($"User with ID '{id}' deleted by admin.");
             StatusMessage = $"Profile(s) have been removed";
 
-            return new JsonResult(string.Empty);
+            return page;
         }
     }
 }

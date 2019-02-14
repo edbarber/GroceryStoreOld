@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using GroceryStore.Data;
@@ -33,6 +34,23 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             _configuration = configuration;
         }
 
+        [TempData]
+        public string StatusMessage { get; set; }
+
+        [BindProperty]
+        public InputModel Input { get; set; }
+
+        public List<OutputModel> Roles { get; set; }
+
+        public class InputModel
+        {
+            [Display(Name = "Search role")]
+            public string SearchRole { get; set; }
+
+            [Display(Name = "Search user")]
+            public string SearchUser { get; set; }
+        }
+
         public class OutputModel
         {
             public ApplicationRole Role { get; set; }
@@ -40,17 +58,36 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             public List<ApplicationUser> Users { get; set; }
         }
 
-        [TempData]
-        public string StatusMessage { get; set; }
+        public void OnGet()
+        {
+            List<OutputModel> output = new List<OutputModel>();
+            List<ApplicationRole> roles = _roleManager.Roles.OrderBy(ar => ar.Name).ToList();
 
-        public IActionResult OnPostSearch(string role, string user)
+            foreach (ApplicationRole currRole in roles)
+            {
+                OutputModel outputModel = new OutputModel
+                {
+                    Role = currRole,
+                    // admin should not be able to delete the admin role (this is needed to keep the integrity of the account database) 
+                    // set it here so we can disable button on front end if this is false
+                    AllowEditAndDelete = currRole.Name != _configuration.GetSection("AdminRole").Value,
+                    Users = GetUsersByRole(currRole.Id)
+                };
+
+                output.Add(outputModel);
+            }
+
+            Roles = output;
+        }
+
+        public IActionResult OnPostSearch()
         {
             List<OutputModel> output = new List<OutputModel>();
             List<ApplicationRole> roles = _context.Roles.ToList();
 
-            if (!string.IsNullOrWhiteSpace(role))
+            if (!string.IsNullOrWhiteSpace(Input.SearchRole))
             {
-                roles = roles.Where(ar => ar.Name.Contains(role, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                roles = roles.Where(ar => ar.Name.Contains(Input.SearchRole, StringComparison.CurrentCultureIgnoreCase)).ToList();
             }
 
             foreach (ApplicationRole currRole in roles)
@@ -61,27 +98,31 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                     // admin should not be able to delete the admin role (this is needed to keep the integrity of the account database) 
                     // set it here so we can disable button on front end if this is false
                     AllowEditAndDelete = currRole.Name != _configuration.GetSection("AdminRole").Value,
-                    Users = GetUsers(currRole.Id)
+                    Users = GetUsersByRole(currRole.Id)
                 };
 
-                if (!string.IsNullOrWhiteSpace(user))
+                if (!string.IsNullOrWhiteSpace(Input.SearchUser))
                 {
-                    outputModel.Users = outputModel.Users.Where(au => au.UserName.Contains(user, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                    outputModel.Users = outputModel.Users.Where(au => au.UserName.Contains(Input.SearchUser, StringComparison.CurrentCultureIgnoreCase)).ToList();
                 }
 
                 output.Add(outputModel);
             }
 
-            return new JsonResult(output);
+            Roles = output;
+
+            return Page();
         }
 
-        public async Task<IActionResult> OnPostDeleteAsync(string id)
+        public async Task<JsonResult> OnPostDeleteAsync(string id)
         {
+            JsonResult page = new JsonResult(Url.Page("Roles"));
+
             var role = await _roleManager.FindByIdAsync(id);
             if (role == null)
             {
                 StatusMessage = $"Unable to load role with ID '{id}'.";
-                return new JsonResult(string.Empty);
+                return page;
             }
 
             // check again if role can be deleted by admin (user shouldn't be able to remove disabled attribute from delete button)
@@ -89,7 +130,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             if (role.Name == _configuration.GetSection("AdminRole").Value)
             {
                 StatusMessage = $"Error: deleting this admin role is forbidden.";
-                return new JsonResult(string.Empty);
+                return page;
             }
 
             var result = await _roleManager.DeleteAsync(role);
@@ -97,18 +138,18 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             {
                 StatusMessage = $"Unexpected error occurred deleteing role with ID '{id}'.";
 
-                return new JsonResult(string.Empty);
+                return page;
             }
 
             await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
             _logger.LogInformation($"Role with ID '{id}' deleted by admin.");
 
-            StatusMessage = $"Role have been removed";
+            StatusMessage = $"Role has been removed";
 
-            return new JsonResult(string.Empty);
+            return page;
         }
 
-        private List<ApplicationUser> GetUsers(string roleId)
+        private List<ApplicationUser> GetUsersByRole(string roleId)
         {
             return (from u in _context.Users
                     join ur in _context.UserRoles on u.Id equals ur.UserId
