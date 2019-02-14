@@ -37,19 +37,10 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         [TempData]
         public string StatusMessage { get; set; }
 
-        [BindProperty]
-        public InputModel Input { get; set; }
-
         public List<OutputModel> Roles { get; set; }
 
-        public class InputModel
-        {
-            [Display(Name = "Search role")]
-            public string SearchRole { get; set; }
-
-            [Display(Name = "Search user")]
-            public string SearchUser { get; set; }
-        }
+        public string SearchRole { get; set; }
+        public string SearchUser { get; set; }
 
         public class OutputModel
         {
@@ -58,36 +49,17 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             public List<ApplicationUser> Users { get; set; }
         }
 
-        public void OnGet()
+        public IActionResult OnGet(string searchRole, string searchUser)
         {
             List<OutputModel> output = new List<OutputModel>();
             List<ApplicationRole> roles = _roleManager.Roles.OrderBy(ar => ar.Name).ToList();
 
-            foreach (ApplicationRole currRole in roles)
+            SearchRole = searchRole;
+            SearchUser = searchUser;
+
+            if (!string.IsNullOrWhiteSpace(searchRole))
             {
-                OutputModel outputModel = new OutputModel
-                {
-                    Role = currRole,
-                    // admin should not be able to delete the admin role (this is needed to keep the integrity of the account database) 
-                    // set it here so we can disable button on front end if this is false
-                    AllowEditAndDelete = currRole.Name != _configuration.GetSection("AdminRole").Value,
-                    Users = GetUsersByRole(currRole.Id)
-                };
-
-                output.Add(outputModel);
-            }
-
-            Roles = output;
-        }
-
-        public IActionResult OnPostSearch()
-        {
-            List<OutputModel> output = new List<OutputModel>();
-            List<ApplicationRole> roles = _context.Roles.ToList();
-
-            if (!string.IsNullOrWhiteSpace(Input.SearchRole))
-            {
-                roles = roles.Where(ar => ar.Name.Contains(Input.SearchRole, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                roles = roles.Where(ar => ar.Name.Contains(searchRole, StringComparison.CurrentCultureIgnoreCase)).ToList();
             }
 
             foreach (ApplicationRole currRole in roles)
@@ -101,9 +73,9 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                     Users = GetUsersByRole(currRole.Id)
                 };
 
-                if (!string.IsNullOrWhiteSpace(Input.SearchUser))
+                if (!string.IsNullOrWhiteSpace(searchUser))
                 {
-                    outputModel.Users = outputModel.Users.Where(au => au.UserName.Contains(Input.SearchUser, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                    outputModel.Users = outputModel.Users.Where(au => au.UserName.Contains(searchUser, StringComparison.CurrentCultureIgnoreCase)).ToList();
                 }
 
                 output.Add(outputModel);

@@ -12,25 +12,26 @@
         <div class="panel panel-default">
             <div class="panel-heading details-control"><span class="details-control-open"></span>Search</div>
             <div class="panel-body">
-                <form method="post" asp-page="Roles" asp-page-handler="Search">
-                    @Html.AntiForgeryToken()
+                <form method="get" asp-page="Roles">
                     <div class="col-md-4 form-group">
-                        <label asp-for="Input.SearchRole"></label>
-                        <input asp-for="Input.SearchRole" class="form-control" />
+                        <label for="searchRole">Search role</label>
+                        <input id="searchRole" name="searchRole" class="form-control" value="@Model.SearchRole" />
                     </div>
                     <div class="col-md-4 form-group">
-                        <label asp-for="Input.SearchUser"></label>
-                        <input asp-for="Input.SearchUser" class="form-control" />
+                        <label for="searchUser">Search user</label>
+                        <input id="searchUser" name="searchUser" class="form-control" value="@Model.SearchUser" />
                     </div>
                     <!-- a bit of a hack fix to get correct alignment on certain displays -->
                     <div class="hidden-sm hidden-xs">
                         <div class="pull-right" style="margin-top:25px;">
+                            <button type="button" class="btn btn-default resetSearch">Reset</button>
                             <button type="submit" class="btn btn-default"><i class="fas fa-search"></i> Search</button>
                         </div>
                     </div>
                     <div class="hidden-lg hidden-md">
                         <div class="col-md-4 form-group">
                             <div class="pull-right">
+                                <button type="button" class="btn btn-default resetSearch">Reset</button>
                                 <button type="submit" class="btn btn-default"><i class="fas fa-search"></i> Search</button>
                             </div>
                         </div>
@@ -118,6 +119,10 @@
                     child.addClass('details-control-open');
                     sibling.removeClass('hidden');
                 }
+            });
+
+            $('.resetSearch').on('click', function () {
+                window.location.href = '@Url.Page("Roles")';
             });
         });
 

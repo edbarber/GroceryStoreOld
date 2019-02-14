@@ -106,12 +106,9 @@ else
                 }
             });
 
-            // default html reset button doesn't reset all fields after search :/
+            // reset page 
             $('#resetSearch').on('click', function () {
-                $('#searchName').val('');
-                $('#searchPrice').val('');
-                $('#searchWeight').val('');
-                $('#searchConversionCode').val('');
+                window.location.href = '@Url.Action("Index", "Home")';
             });
         });
     </script>
