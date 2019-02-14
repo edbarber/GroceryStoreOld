@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using GroceryStore.Models;
 using Microsoft.EntityFrameworkCore;
+using GroceryStore.Models.HomeViewModels;
 
 namespace GroceryStore.Controllers
 {
@@ -18,10 +19,39 @@ namespace GroceryStore.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string searchName, string searchPrice, string searchWeight, string searchConversionCode)
         {
-            IEnumerable<Grocery> groceryStoreContext = _context.Grocery.Include(g => g.Conversion);
-            return View(groceryStoreContext);
+            IndexViewModel model = new IndexViewModel
+            {
+                Groceries = _context.Grocery.Include(g => g.Conversion),
+                SearchName = searchName,
+                SearchPrice = searchPrice,
+                SearchWeight = searchWeight,
+                SearchConversionCode = searchConversionCode
+
+            };
+
+            if (!string.IsNullOrWhiteSpace(searchName))
+            {
+                model.Groceries = model.Groceries.Where(g => g.Name.Contains(searchName, StringComparison.CurrentCultureIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchPrice))
+            {
+                model.Groceries = model.Groceries.Where(g => g.Price.ToString().Contains(searchPrice, StringComparison.CurrentCultureIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchWeight))
+            {
+                model.Groceries = model.Groceries.Where(g => g.Weight.ToString().Contains(searchWeight, StringComparison.CurrentCultureIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchConversionCode))
+            {
+                model.Groceries = model.Groceries.Where(g => g.Conversion.Code.Contains(searchConversionCode, StringComparison.CurrentCultureIgnoreCase));
+            }
+
+            return View(model);
         }
 
         public async Task<IActionResult> Stock(int id)

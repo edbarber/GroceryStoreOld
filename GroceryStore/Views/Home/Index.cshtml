@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Grocery>
+﻿@model GroceryStore.Models.HomeViewModels.IndexViewModel
 @{
     ViewData["Title"] = "Groceries";
 }
@@ -7,32 +7,40 @@
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-default">
-            <div class="panel-heading details-control"><span class="details-control-collapsed"></span>Search</div>
-            <div class="panel-body hidden">
-                <div class="form-group col-md-3">
-                    <label for="searchName">Search name</label>
-                    <input class="form-control" id="searchName" />
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="searchPrice">Search price</label>
-                    <input class="form-control" id="searchPrice" />
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="searchWeight">Search weight</label>
-                    <input class="form-control" id="searchWeight" />
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="searchConversionCode">Search conversion code</label>
-                    <input class="form-control" id="searchConversionCode" />
-                </div>
+            <div class="panel-heading details-control"><span class="details-control-open"></span>Search</div>
+            <div class="panel-body">
+                <form method="get" asp-action="Index" asp-controller="Home">
+                    <div class="form-group col-md-3">
+                        <label for="searchName">Search name</label>
+                        <input id="searchName" name="searchName" class="form-control" value="@Model.SearchName" />
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="searchPrice">Search price</label>
+                        <input id="searchPrice" name="searchPrice" class="form-control" value="@Model.SearchPrice" />
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="searchWeight">Search weight</label>
+                        <input id="searchWeight" name="searchWeight" class="form-control" value="@Model.SearchWeight" />
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="searchConversionCode">Search conversion code</label>
+                        <input id="searchConversionCode" name="searchConversionCode" class="form-control" value="@Model.SearchConversionCode" />
+                    </div>
+                    <div class="pull-right">
+                        <div class="col-md-12">
+                            <button id="resetSearch" type="button" class="btn btn-default">Reset</button>
+                            <button type="submit" class="btn btn-default"><i class="fas fa-search"></i> Search</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-<div class="row" id="groceries">
-@if (Model.Count() > 0)
+<div class="row">
+@if (Model.Groceries.Count() > 0)
 {
-    foreach (var item in Model)
+    foreach (var item in Model.Groceries)
     {
         <div class="col-md-4">
             <div class="thumbnail">
@@ -70,9 +78,6 @@
             </div>
         </div>
     }
-    <div class="col-md-12 hidden" id="searchResults">
-        <p>There are no results to show.</p>
-    </div>
 }
 else
 {
@@ -85,22 +90,6 @@ else
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#searchName').on('keyup', function () {
-                search($(this).val(), $('#searchPrice').val(), $('#searchWeight').val(), $('#searchConversionCode').val());
-            });
-
-            $('#searchPrice').on('keyup', function () {
-                search($('#searchName').val(), $(this).val(), $('#searchWeight').val(), $('#searchConversionCode').val());
-            });
-
-            $('#searchWeight').on('keyup', function () {
-                search($('#searchName').val(), $('#searchPrice').val(), $(this).val(), $('#searchConversionCode').val());
-            });
-
-            $('#searchConversionCode').on('keyup', function () {
-                search($('#searchName').val(), $('#searchPrice').val(), $('#searchWeight').val(), $(this).val());
-            });
-
             $('.details-control').on('click', function () {
                 var sibling = $(this).next();
                 var child = $(this).children()[0];
@@ -116,77 +105,14 @@ else
                     sibling.removeClass('hidden');
                 }
             });
-        });
 
-        function search(name, price, weight, conversionCode) {
-
-            var elements = $('#groceries > .col-md-4');
-            var hiddenCount = 0;
-
-            elements.each(function (index, element) {
-                var included = true;
-                var captionElement = $(element).children('.thumbnail').children('.caption').first();
-                var text = "";
-
-                text = captionElement.children('.name').first().text();
-                included = compareString(text, name);
-
-                // don't bother comparing again if it's not included
-                if (included) {
-                    text = captionElement.children('p').first().children('.price').first().text();
-                    included = compareString(text, price);
-                }
-
-                if (included) {
-                    var weightSpan = captionElement.children('p').first().children('.weight');
-
-                    // weight needs to exist as weight can possibly not exist
-                    if (weightSpan.length > 0) {
-                        text = weightSpan.first().text();
-                        included = compareString(text, weight);
-                    }
-                }
-
-                if (included) {
-                    var conversionCodeSpan = captionElement.children('p').first().children('.conversionCode');
-
-                    // conversion code needs to exist as conversion code can possibly not exist
-                    if (conversionCodeSpan.length > 0) {
-                        text = conversionCodeSpan.first().text();
-                        included = compareString(text, conversionCode);
-                    }
-                }
-
-                if (!included) {
-                    if (!$(element).hasClass('hidden')) {
-                        $(element).addClass('hidden');
-                    }
-
-                    hiddenCount++;
-                }
-                else {
-                    $(element).removeClass('hidden');
-                }
+            // default html reset button doesn't reset all fields after search :/
+            $('#resetSearch').on('click', function () {
+                $('#searchName').val('');
+                $('#searchPrice').val('');
+                $('#searchWeight').val('');
+                $('#searchConversionCode').val('');
             });
-
-            var element = $('#searchResults');
-
-            if (elements.length == hiddenCount) {
-                element.removeClass('hidden');
-            }
-            else {
-                if (!element.hasClass('hidden')) {
-                    element.addClass('hidden');
-                }
-            }
-        }
-
-        function compareString(value, compareTo) {
-            if (value.toLowerCase().includes(compareTo.toLowerCase())) {
-                return true;
-            }
-
-            return false;
-        }
+        });
     </script>
 }
