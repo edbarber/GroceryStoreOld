@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using GroceryStore.Models;
 using Microsoft.EntityFrameworkCore;
+using GroceryStore.Models.HomeViewModels;
 
 namespace GroceryStore.Controllers
 {
@@ -18,38 +19,39 @@ namespace GroceryStore.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string searchName, string searchPrice, string searchWeight, string searchConversionCode)
         {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Search(string name, string price, string weight, string conversionCode)
-        {
-            IEnumerable<Grocery> groceryStoreContext = _context.Grocery.Include(g => g.Conversion);
-
-            if (!string.IsNullOrWhiteSpace(name))
+            IndexViewModel model = new IndexViewModel
             {
-                groceryStoreContext = groceryStoreContext.Where(g => g.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+                Groceries = _context.Grocery.Include(g => g.Conversion),
+                SearchName = searchName,
+                SearchPrice = searchPrice,
+                SearchWeight = searchWeight,
+                SearchConversionCode = searchConversionCode
+
+            };
+
+            if (!string.IsNullOrWhiteSpace(searchName))
+            {
+                model.Groceries = model.Groceries.Where(g => g.Name.Contains(searchName, StringComparison.CurrentCultureIgnoreCase));
             }
 
-            if (!string.IsNullOrWhiteSpace(price))
+            if (!string.IsNullOrWhiteSpace(searchPrice))
             {
-                groceryStoreContext = groceryStoreContext.Where(g => g.Price.ToString().Contains(price, StringComparison.CurrentCultureIgnoreCase));
+                model.Groceries = model.Groceries.Where(g => g.Price.ToString().Contains(searchPrice, StringComparison.CurrentCultureIgnoreCase));
             }
 
-            if (!string.IsNullOrWhiteSpace(weight))
+            if (!string.IsNullOrWhiteSpace(searchWeight))
             {
-                groceryStoreContext = groceryStoreContext.Where(g => g.Weight.ToString().Contains(weight, StringComparison.CurrentCultureIgnoreCase));
+                model.Groceries = model.Groceries.Where(g => g.Weight.ToString().Contains(searchWeight, StringComparison.CurrentCultureIgnoreCase));
             }
 
-            if (!string.IsNullOrWhiteSpace(conversionCode))
+            if (!string.IsNullOrWhiteSpace(searchConversionCode))
             {
-                groceryStoreContext = groceryStoreContext.Where(g => g.Conversion.Code.Contains(conversionCode, StringComparison.CurrentCultureIgnoreCase));
+                model.Groceries = model.Groceries.Where(g => g.Conversion.Code.Contains(searchConversionCode, StringComparison.CurrentCultureIgnoreCase));
             }
 
-            return Json(groceryStoreContext);
+            return View(model);
         }
 
         public async Task<IActionResult> Stock(int id)

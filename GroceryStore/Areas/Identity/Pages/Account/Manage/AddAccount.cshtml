@@ -6,7 +6,6 @@
 }
 
 <h2>@ViewData["Title"]</h2>
-<partial name="_StatusMessage" model="Model.StatusMessage" />
 <div class="row">
     <div class="col-md-4">
         <form method="post">
@@ -27,6 +26,11 @@
                 <label asp-for="Input.UserName"></label>
                 <input asp-for="Input.UserName" class="form-control" />
                 <span asp-validation-for="Input.UserName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.SelectedRoleId"></label>
+                <select asp-for="Input.SelectedRoleId" asp-items="Model.Roles" class="form-control"></select>
+                <span asp-validation-for="Input.SelectedRoleId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Input.Email"></label>

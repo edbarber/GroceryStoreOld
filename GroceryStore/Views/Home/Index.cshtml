@@ -1,4 +1,5 @@
-﻿@{
+﻿@model GroceryStore.Models.HomeViewModels.IndexViewModel
+@{
     ViewData["Title"] = "Groceries";
 }
 
@@ -8,50 +9,87 @@
         <div class="panel panel-default">
             <div class="panel-heading details-control"><span class="details-control-open"></span>Search</div>
             <div class="panel-body">
-                <div class="form-group col-md-3">
-                    <label for="searchName">Search name</label>
-                    <input class="form-control" id="searchName" />
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="searchPrice">Search price</label>
-                    <input class="form-control" id="searchPrice" />
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="searchWeight">Search weight</label>
-                    <input class="form-control" id="searchWeight" />
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="searchConversionCode">Search conversion code</label>
-                    <input class="form-control" id="searchConversionCode" />
-                </div>
-                @Html.AntiForgeryToken()
+                <form method="get" asp-action="Index" asp-controller="Home">
+                    <div class="form-group col-md-3">
+                        <label for="searchName">Search name</label>
+                        <input id="searchName" name="searchName" class="form-control" value="@Model.SearchName" />
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="searchPrice">Search price</label>
+                        <input id="searchPrice" name="searchPrice" class="form-control" value="@Model.SearchPrice" />
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="searchWeight">Search weight</label>
+                        <input id="searchWeight" name="searchWeight" class="form-control" value="@Model.SearchWeight" />
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="searchConversionCode">Search conversion code</label>
+                        <input id="searchConversionCode" name="searchConversionCode" class="form-control" value="@Model.SearchConversionCode" />
+                    </div>
+                    <div class="pull-right">
+                        <div class="col-md-12">
+                            <button id="resetSearch" type="button" class="btn btn-default">Reset</button>
+                            <button type="submit" class="btn btn-default"><i class="fas fa-search"></i> Search</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-<div class="row" id="groceries"></div>
+<div class="row">
+@if (Model.Groceries.Count() > 0)
+{
+    foreach (var item in Model.Groceries)
+    {
+        <div class="col-md-4">
+            <div class="thumbnail">
+                <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId">
+                @if (string.IsNullOrWhiteSpace(item.ImageUrl))
+                {
+                    <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" class="thumbnail-size" />
+                }
+                else
+                {
+                    <img src="@item.ImageUrl" alt="@item.ImageAlt" class="thumbnail-size" />
+                }
+                </a>
+                <div class="caption">
+                    <h3 class="name">@item.Name</h3>
+                    <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" class="btn btn-primary" style="width:100px;">Stock</a>
+                    @if (item.Conversion != null)
+                    {
+                        <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span> per <span class="weight">@string.Format("{0:G29}", item.Weight)</span><span class="conversionCode">@item.Conversion.Code</span></p>
+                    }
+                    else
+                    {
+                        <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span></p>
+                    }
+
+                    @if (string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <p>N/A</p>
+                    }
+                    else
+                    {
+                        <p>@item.Description</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="col-md-12">
+        <p>There are no items to show.</p>
+    </div>
+}
+</div>
 
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            search('', '', '', '');
-
-            $('#searchName').on('keyup', function () {
-                search($(this).val(), $('#searchPrice').val(), $('#searchWeight').val(), $('#searchConversionCode').val());
-            });
-
-            $('#searchPrice').on('keyup', function () {
-                search($('#searchName').val(), $(this).val(), $('#searchWeight').val(), $('#searchConversionCode').val());
-            });
-
-            $('#searchWeight').on('keyup', function () {
-                search($('#searchName').val(), $('#searchPrice').val(), $(this).val(), $('#searchConversionCode').val());
-            });
-
-            $('#searchConversionCode').on('keyup', function () {
-                search($('#searchName').val(), $('#searchPrice').val(), $('#searchWeight').val(), $(this).val());
-            });
-
             $('.details-control').on('click', function () {
                 var sibling = $(this).next();
                 var child = $(this).children()[0];
@@ -67,71 +105,11 @@
                     sibling.removeClass('hidden');
                 }
             });
-        });
 
-        function search(name, price, weight, conversionCode) {
-            $.ajax({
-                url: '@Url.Action("Search", "Home")',
-                type: 'POST',
-                data: {
-                    name: name,
-                    price: price,
-                    weight: weight,
-                    conversionCode: conversionCode
-                },
-                headers: {
-                    RequestVerificationToken:
-                        $('input:hidden[name="__RequestVerificationToken"]').val()
-                },
-                success: function (data) {
-                    var groceries = $("#groceries");
-
-                    groceries.empty();
-
-                    if (data.length == 0) {
-                        var currChild = $("<div>").appendTo(groceries).addClass("col-md-4");
-                        $("<p>").appendTo(currChild).text("No results found.");
-                    }
-                    else {
-                        for (var i = 0; i < data.length; i++) {
-                            var currChild = $("<div>").appendTo(groceries).addClass("col-md-4");
-                            currChild = $("<div>").appendTo(currChild).addClass("thumbnail");
-                            currChild = $("<a>").appendTo(currChild).prop("href", "/Home/Stock?groceryId=" + data[i].groceryId);
-
-                            if (data[i].imageUrl == null || data[i].imageUrl == "") {
-                                $("<img>").appendTo(currChild).prop("src", "/images/imagenotavailable1-39de324.png").prop("alt", "Missing image").addClass("thumbnail-size");
-                            }
-                            else {
-                                $("<img>").appendTo(currChild).prop("src", data[i].imageUrl).prop("alt", data[i].imageAlt).addClass("thumbnail-size");
-                            }
-
-                            currChild = $("#groceries").children()[i].children[0];
-                            currChild = $("<div>").appendTo(currChild).addClass("caption");
-
-                            $("<h3>").appendTo(currChild).text(data[i].name);
-                            $("<a>").appendTo(currChild).prop("href", "/Home/Stock/" + data[i].groceryId).addClass("btn btn-primary").prop("style", "width:100px;").text("Stock");
-
-                            var weight;
-
-                            if (data[i].weight == null) {
-                                weight = "";
-                            }
-                            else {
-                                weight = data[i].weight;
-                            }
-
-                            $("<p>").appendTo(currChild).addClass("font-weight-bold").text(currencyFormatter.format(data[i].price) + " per " + weight + " " + data[i].conversion.code);
-
-                            if (data[i].description != null && data[i].description != "") {
-                                $("<p>").appendTo(currChild).text(data[i].description);
-                            }
-                            else {
-                                $("<p>").appendTo(currChild).text("N/A");
-                            }
-                        }
-                    }
-                }
+            // reset page 
+            $('#resetSearch').on('click', function () {
+                window.location.href = '@Url.Action("Index", "Home")';
             });
-        }
+        });
     </script>
 }

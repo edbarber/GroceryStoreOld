@@ -13,7 +13,7 @@
     }
     <li class="@ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)"><a asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
     <li class="@ManageNavPages.PersonalDataNavClass(ViewContext)"><a asp-page="./PersonalData">Personal data</a></li>
-    @if (User.IsInRole("Admin"))
+    @if ((await AuthorizationService.AuthorizeAsync(User, "Admin")).Succeeded)
     {
         <li class="@ManageNavPages.AccountsNavClass(ViewContext)"><a asp-page="./Accounts">Accounts</a></li>
         <li class="@ManageNavPages.RolesNavClass(ViewContext)"><a asp-page="./Roles">Roles</a></li>

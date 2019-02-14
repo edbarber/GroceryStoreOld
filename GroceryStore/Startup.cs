@@ -52,6 +52,14 @@ namespace GroceryStore
                 options.UseSqlServer(
                     Configuration.GetConnectionString("AccountConnection")));
 
+            // inject custom class for common db functionality 
+            // -----------------------------------------------------------
+            DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            optionsBuilder.UseSqlServer(Configuration.GetConnectionString("AccountConnection"));
+
+            services.AddSingleton(new DbCommonFunctionality(optionsBuilder.Options));
+            // -----------------------------------------------------------
+
             // Use add identity instead and added add default ui with add default token providers due to bug in 
             // asp.net core 2.1 with checking what role current logged in user belongs to
             services.AddIdentity<ApplicationUser, ApplicationRole>()
@@ -62,6 +70,13 @@ namespace GroceryStore
             services.AddDbContext<GroceryStoreContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("GroceryStoreConnection")));
 
+            // if admin role name changes then changes to role will take affect in authroizing roles
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin", policy =>
+                    policy.RequireRole(Configuration.GetSection("AdminRole").Value));
+            });
+
             services.AddMvc()
                 .AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -69,7 +84,8 @@ namespace GroceryStore
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext context,
-            RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, ILogger<RegisterModel> logger)
+            RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, ILogger<RegisterModel> logger, 
+            DbCommonFunctionality dbCommonFunctionality)
         {
             if (env.IsDevelopment())
             {
@@ -95,7 +111,7 @@ namespace GroceryStore
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            SeedData.Initialize(context, userManager, roleManager, Configuration, logger).Wait();
+            SeedData.Initialize(context, userManager, roleManager, Configuration, logger, dbCommonFunctionality).Wait();
         }
     }
 }

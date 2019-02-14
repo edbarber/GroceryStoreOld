@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = "Admin")]
     public class EditAccountPasswordModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -93,10 +93,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            if (user.Id == _userManager.GetUserId(User))
-            {
-                await _signInManager.RefreshSignInAsync(user);
-            }
+            await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
 
             _logger.LogInformation($"Admin changed user {id} password successfully.");
             StatusMessage = "Password has been changed";

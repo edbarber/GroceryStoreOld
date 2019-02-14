@@ -6,148 +6,182 @@
 }
 
 <h4>@ViewData["Title"]</h4>
+<partial name="_StatusMessage" model="Model.StatusMessage" />
 <div class="row">
     <div class="col-md-12">
-        <div class="form-group col-md-4">
-            <button class="btn btn-default" onclick="expandAll()">Expand All</button>
-            <button class="btn btn-default" onclick="collapseAll()">Collapse All</button>
-        </div>
-        <div class="form-group">
-            <div class="form-group col-md-4">
-                <label for="roleSearch">Search role</label>
-                <input id="roleSearch" class="form-control" />
+        <div class="panel panel-default">
+            <div class="panel-heading details-control"><span class="details-control-open"></span>Search</div>
+            <div class="panel-body">
+                <form method="get" asp-page="Roles">
+                    <div class="col-md-4 form-group">
+                        <label for="searchRole">Search role</label>
+                        <input id="searchRole" name="searchRole" class="form-control" value="@Model.SearchRole" />
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label for="searchUser">Search user</label>
+                        <input id="searchUser" name="searchUser" class="form-control" value="@Model.SearchUser" />
+                    </div>
+                    <!-- a bit of a hack fix to get correct alignment on certain displays -->
+                    <div class="hidden-sm hidden-xs">
+                        <div class="pull-right" style="margin-top:25px;">
+                            <button type="button" class="btn btn-default resetSearch">Reset</button>
+                            <button type="submit" class="btn btn-default"><i class="fas fa-search"></i> Search</button>
+                        </div>
+                    </div>
+                    <div class="hidden-lg hidden-md">
+                        <div class="col-md-4 form-group">
+                            <div class="pull-right">
+                                <button type="button" class="btn btn-default resetSearch">Reset</button>
+                                <button type="submit" class="btn btn-default"><i class="fas fa-search"></i> Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div class="form-group col-md-4">
-                <label for="userSearch">Search user</label>
-                <input id="userSearch" class="form-control" />
-            </div>
-            @Html.AntiForgeryToken()
         </div>
-        <table class="table table-striped" id="roleTable">
-            <thead>
-                <tr>
-                    <th>Role</th>
-                </tr>
-            </thead>
-            <tbody id="roleData"></tbody>
-        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <button class="btn btn-default" onclick="expandAll()">Expand All</button>
+        <button class="btn btn-default" onclick="collapseAll()">Collapse All</button>
+        <div class="pull-right form-group">
+            <a asp-page="./AddRole" class="btn btn-default">Add Role</a>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default" id="roleData">
+        @foreach (var item in Model.Roles)
+        {
+            <div class="panel-heading details-control"><span class="details-control-open"></span>@item.Role.Name</div>
+            <div class="panel-body">
+                @if (item.Users.Count > 0)
+                {
+                    <dl class="dl-horizontal" style="display:inline-block;">
+                        <dt>Associated Users</dt>
+                        @foreach (var user in item.Users)
+                        {
+                            <dd>@user.UserName</dd>
+                        }
+                    </dl>
+                }
+                else
+                {
+                    <text>There are no users to show</text>
+                }
+                <div class="pull-right">
+                    @if (item.AllowEditAndDelete)
+                    {
+                        <button class="btn btn-default editRole" title="Edit this role" id="edit_@item.Role.Id" style="margin-right:5px;"><i class="glyphicon glyphicon-pencil"></i></button>
+                        <button class="btn btn-default deleteRole" title="Delete this role" id="delete_@item.Role.Id"><i class="glyphicon glyphicon-trash"></i></button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-default" style="margin-right:5px;" disabled><i class="glyphicon glyphicon-pencil"></i></button>
+                        <button class="btn btn-default" disabled><i class="glyphicon glyphicon-trash"></i></button>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model.Roles.Count == 0)
+        {
+            <div class="panel-body">There are no roles to show</div>
+        }
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            search('', '');
-
-            var paginate = $("#roleTable").children()[1].children.length > 10;
-
-            $("#roleTable").DataTable({
-                pageLength: 10,
-                bLengthChange: false,
-                bPaginate: paginate,
-                ordering: false,
-                searching: false,
-                bInfo: false
+            $('.editRole').on('click', function () {
+                return confirmEditRole($(this).prop('id').split('_')[1]);
             });
 
-            $('#roleSearch').on('keyup', function () {
-                search($(this).val(), $('#userSearch').val());
+            $('.deleteRole').on('click', function () {
+                return confirmDeleteRole($(this).prop('id').split('_')[1]);
             });
 
-            $('#userSearch').on('keyup', function () {
-                search($('#roleSearch').val(), $(this).val());
+            $('.details-control').on('click', function () {
+                var sibling = $(this).next();
+                var child = $(this).children().first();
+
+                if (!sibling.hasClass('hidden')) {
+                    child.removeClass('details-control-open');
+                    child.addClass('details-control-collapsed');
+                    sibling.addClass('hidden');
+                }
+                else {
+                    child.removeClass('details-control-collapsed');
+                    child.addClass('details-control-open');
+                    sibling.removeClass('hidden');
+                }
+            });
+
+            $('.resetSearch').on('click', function () {
+                window.location.href = '@Url.Page("Roles")';
             });
         });
 
-        function search(role, user) {
+        function confirmEditRole(id) {
+            if (confirm('Are you sure you want to edit this role? The associated users will have their role changed to the role that\'s going to be updated with it.')) {
+                window.location.href = './EditRole?id=' + id;
+            }
+        }
+
+        function confirmDeleteRole(id) {
+            if (confirm('Are you sure you want to delete this role? The associated users will not have this role associated anymore unless another role is assigned to them.')) {
+                deleteRole(id);
+            }
+        }
+
+        function deleteRole(id) {
             $.ajax({
-                url: '@Url.Page("Roles")',
+                url: '@Url.Page("Roles", "Delete")',
                 type: 'POST',
                 data: {
-                    role: role,
-                    user: user
+                    id: id
                 },
                 headers: {
                     RequestVerificationToken:
                         $('input:hidden[name="__RequestVerificationToken"]').val()
                 },
                 success: function (data) {
-                    var body = $('#roleData');
-
-                    body.empty();
-
-                    if (data.length > 0) {
-                        for (var i = 0; i < data.length; i++) {
-                            var currChild = $('<tr>').appendTo(body).addClass('details-control').on('click', function () {
-                                var row = $(this).next();
-                                var child = $(this).children()[0].children[0];
-
-                                if (row.hasClass('hidden')) {
-                                    row.removeClass('hidden');
-                                    $(child).removeClass('details-control-collapsed');
-                                    $(child).addClass('details-control-open');
-                                }
-                                else {
-                                    row.addClass('hidden');
-                                    $(child).removeClass('details-control-open');
-                                    $(child).addClass('details-control-collapsed');
-                                }
-                            });
-
-                            currChild = $('<td>').appendTo(currChild);
-                            $('<span>').appendTo(currChild).addClass('details-control-open').after(data[i].role);
-
-                            currChild = $('<tr>').appendTo(body);
-
-                            if (data[i].users.length > 0) {
-                                currChild = $('<td>').appendTo(currChild);
-                                currChild = $('<dl>').appendTo(currChild).addClass('dl-horizontal');
-                                $('<dt>').appendTo(currChild).text('Associated Users');
-
-                                for (var j = 0; j < data[i].users.length; j++) {
-                                    $('<dd>').appendTo(currChild).text(data[i].users[j].userName);
-                                }
-                            }
-                            else {
-                                $('<td>').appendTo(currChild).text('There are no users associated with this role');
-                            }
-                        }
-                    }
-                    else {
-                        var currChild = $('<tr>').appendTo(body);
-                        $('<td>').appendTo(currChild).text('There are no matching roles');
-                    }
+                    window.location.replace(data);
                 }
             });
         }
 
         function expandAll() {
-            $('#roleTable > tbody > tr').each(function (index, element) {
-                var child = $(element).children()[0].children[0];
+            $('#roleData > .panel-heading.details-control').each(function (index, element) {
+                var child = $(element).children().first();
 
-                if ($(element).hasClass('details-control')) {
-                    $(child).removeClass('details-control-collapsed');
-                    $(child).addClass('details-control-open');
+                if (child.hasClass('details-control-collapsed')) {
+                    child.removeClass('details-control-collapsed');
+                    child.addClass('details-control-open');
                 }
-                else {
-                    $(element).removeClass('hidden');
-                }
+
+                $(element).next('.panel-body').removeClass('hidden');    
             });
         }
 
         function collapseAll() {
-            $('#roleTable > tbody > tr').each(function (index, element) {
-                var child = $(element).children()[0].children[0];
+            $('#roleData > .panel-heading.details-control').each(function (index, element) {
+                var child = $(element).children().first();
 
-                if ($(element).hasClass('details-control')) {
-                    $(child).removeClass('details-control-open');
-                    $(child).addClass('details-control-collapsed');
+                if (child.hasClass('details-control-open')) {
+                    child.removeClass('details-control-open');
+                    child.addClass('details-control-collapsed');
                 }
-                else {
-                    // don't add twice
-                    if (!$(element).hasClass('hidden')) {
-                        $(element).addClass('hidden');
-                    }
+
+                var sibling = $(element).next('.panel-body');
+
+                // don't add twice
+                if (!sibling.hasClass('hidden')) {
+                    sibling.addClass('hidden');
                 }
             });
         }

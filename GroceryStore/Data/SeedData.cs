@@ -20,11 +20,15 @@ namespace GroceryStore.Data
             }
         }
 
+        /// <summary>
+        /// Initializes the default settings related to users and roles. Also performs integrity checks against the exisiting default users and roles.
+        /// </summary>
         public static async Task Initialize(ApplicationDbContext context,
                           UserManager<ApplicationUser> userManager,
                           RoleManager<ApplicationRole> roleManager,
                           IConfiguration configuration,
-                          ILogger<RegisterModel> logger)
+                          ILogger<RegisterModel> logger, 
+                          DbCommonFunctionality dbCommonFunctionality)
         {
             context.Database.EnsureCreated();
 
@@ -33,15 +37,16 @@ namespace GroceryStore.Data
             string userName = administration.GetSection("UserName").Value;
             string email = administration.GetSection("Email").Value;
             string phoneNumber = administration.GetSection("PhoneNumber").Value;
-            string defaultAdminRole = administration.GetSection("Role").Value;
+            string adminRole = configuration.GetSection("AdminRole").Value;
             string password = administration.GetSection("Password").Value;
             string firstName = administration.GetSection("FirstName").Value;
             string lastName = administration.GetSection("LastName").Value;
             string defaultRole = configuration.GetSection("DefaultRole").Value;
 
-            if (await roleManager.FindByNameAsync(defaultAdminRole) == null)
+            // create the role associated to the default admin if it doesn't exist
+            if (await roleManager.FindByNameAsync(adminRole) == null)
             {
-                var result = await roleManager.CreateAsync(new ApplicationRole(defaultAdminRole));
+                var result = await roleManager.CreateAsync(new ApplicationRole(adminRole));
 
                 if (result.Succeeded)
                 {
@@ -55,6 +60,7 @@ namespace GroceryStore.Data
                 }
             }
 
+            // create the default role if it doesn't exist
             if (await roleManager.FindByNameAsync(defaultRole) == null)
             {
                 var result = await roleManager.CreateAsync(new ApplicationRole(defaultRole));
@@ -71,9 +77,12 @@ namespace GroceryStore.Data
                 }
             }
 
-            if (await userManager.FindByNameAsync(userName) == null)
+            var user = await userManager.FindByNameAsync(userName); // find admin by default admin username
+
+            if (user == null)
             {
-                var user = new ApplicationUser
+                // if couldn't find admin by default admin username then create it
+                user = new ApplicationUser
                 {
                     UserName = userName,
                     Email = email,
@@ -82,11 +91,15 @@ namespace GroceryStore.Data
                     LastName = lastName
                 };
 
+                // add password associated to default admin
                 var result = await userManager.CreateAsync(user, password);
 
                 if (result.Succeeded)
                 {
-                    logger.LogInformation("Created admin account with password.");
+                    logger.LogInformation("Created default admin account with password.");
+
+                    // find admin by default admin username again as a new id was created for this user so we need to get the user info again
+                    user = await userManager.FindByNameAsync(userName); 
                 }
                 else
                 {
@@ -94,12 +107,39 @@ namespace GroceryStore.Data
 
                     return;
                 }
+            }
 
-                result = await userManager.AddToRoleAsync(user, defaultAdminRole);
+            // find current role associated to default admin
+            var role = dbCommonFunctionality.GetRoleForUser(user.Id);
+
+            // if role is incorrect
+            if (role != null && role.Name != adminRole)
+            {
+                // remove that incorrect role from the associated default admin
+                IdentityResult result = await userManager.RemoveFromRoleAsync(user, role.Name);
 
                 if (result.Succeeded)
                 {
-                    logger.LogInformation("Admin role added to admin account.");
+                    logger.LogInformation("Invalid role removed from default admin account.");
+                    role = null;    // role instance needs to be updated
+                }
+                else
+                {
+                    LogErrors(result.Errors, logger);
+
+                    return;
+                }
+            }
+
+            // if there's no role associated to default admin
+            if (role == null)
+            {
+                // add the correct role to the default admin
+                IdentityResult result = await userManager.AddToRoleAsync(user, adminRole);
+
+                if (result.Succeeded)
+                {
+                    logger.LogInformation("Admin role added to default admin account.");
                 }
                 else
                 {
