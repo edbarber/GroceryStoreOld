@@ -19,7 +19,7 @@ body {
 }
 
 /* Make .svg files in the carousel display properly in older browsers */
-.carousel-inner .item img[src$=".svg"] {
+.carousel-inner-item-svg-img {
     width: 100%;
 }
 
@@ -97,8 +97,7 @@ span.details-control-collapsed::before {
     color: #41b941;
 }
 
-/* make sure it's a link */
-a.link-disabled {
+.link-disabled {
     cursor: not-allowed;
     opacity: 0.5;
     text-decoration: none;

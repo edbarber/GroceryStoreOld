@@ -22,9 +22,11 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<RolesModel> _logger;
-        private readonly IConfiguration _configuration; 
+        private readonly IConfiguration _configuration;
+        private readonly DbCommonFunctionality _dbCommonFunctionality;
 
-        public RolesModel(ApplicationDbContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<RolesModel> logger, IConfiguration configuration)
+        public RolesModel(ApplicationDbContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<RolesModel> logger, IConfiguration configuration, 
+            DbCommonFunctionality dbCommonFunctionality)
         {
             _context = context;
             _roleManager = roleManager;
@@ -32,6 +34,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             _signInManager = signInManager;
             _logger = logger;
             _configuration = configuration;
+            _dbCommonFunctionality = dbCommonFunctionality;
         }
 
         [TempData]
@@ -70,7 +73,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                     // admin should not be able to delete the admin role (this is needed to keep the integrity of the account database) 
                     // set it here so we can disable button on front end if this is false
                     AllowEditAndDelete = currRole.Name != _configuration.GetSection("AdminRole").Value,
-                    Users = GetUsersByRole(currRole.Id)
+                    Users = _dbCommonFunctionality.GetUsersByRoleId(currRole.Id)
                 };
 
                 if (!string.IsNullOrWhiteSpace(searchUser))
@@ -119,15 +122,6 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             StatusMessage = $"Role has been removed";
 
             return page;
-        }
-
-        private List<ApplicationUser> GetUsersByRole(string roleId)
-        {
-            return (from u in _context.Users
-                    join ur in _context.UserRoles on u.Id equals ur.UserId
-                    join r in _context.Roles on ur.RoleId equals r.Id
-                    where r.Id == roleId
-                    select u).ToList();
         }
     }
 }

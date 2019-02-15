@@ -28,7 +28,6 @@ namespace GroceryStore.Controllers
                 SearchPrice = searchPrice,
                 SearchWeight = searchWeight,
                 SearchConversionCode = searchConversionCode
-
             };
 
             if (!string.IsNullOrWhiteSpace(searchName))

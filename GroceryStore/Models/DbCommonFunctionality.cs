@@ -16,7 +16,16 @@ namespace GroceryStore.Models
             _context = new ApplicationDbContext(options);
         }
 
-        public ApplicationRole GetRoleForUser(string userId)
+        public List<ApplicationUser> GetUsersByRoleId(string roleId)
+        {
+            return (from u in _context.Users
+                    join ur in _context.UserRoles on u.Id equals ur.UserId
+                    join r in _context.Roles on ur.RoleId equals r.Id
+                    where r.Id == roleId
+                    select u).ToList();
+        }
+
+        public ApplicationRole GetRoleByUserId(string userId)
         {
             return (from u in _context.Users
                     join ur in _context.UserRoles on u.Id equals ur.UserId

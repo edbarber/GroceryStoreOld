@@ -110,7 +110,7 @@ namespace GroceryStore.Data
             }
 
             // find current role associated to default admin
-            var role = dbCommonFunctionality.GetRoleForUser(user.Id);
+            var role = dbCommonFunctionality.GetRoleByUserId(user.Id);
 
             // if role is incorrect
             if (role != null && role.Name != adminRole)

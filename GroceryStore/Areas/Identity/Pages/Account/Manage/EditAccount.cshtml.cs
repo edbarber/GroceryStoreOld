@@ -85,7 +85,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 UserName = user.UserName,
-                SelectedRoleId = _dbCommonFunctionality.GetRoleForUser(id)?.Id
+                SelectedRoleId = _dbCommonFunctionality.GetRoleByUserId(id)?.Id
             };
 
             Roles = _roleManager.Roles.OrderBy(ar => ar.Name).Select(ar => new SelectListItem(ar.Name, ar.Id)).ToList();
@@ -117,7 +117,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             // list gets cleared after page load so recreate it
             Roles = _roleManager.Roles.OrderBy(ar => ar.Name).Select(ar => new SelectListItem(ar.Name, ar.Id)).ToList();
 
-            var roleToRemove = _dbCommonFunctionality.GetRoleForUser(user.Id);
+            var roleToRemove = _dbCommonFunctionality.GetRoleByUserId(user.Id);
 
             if (!AllowUsernameAndRoleEdit)
             {
