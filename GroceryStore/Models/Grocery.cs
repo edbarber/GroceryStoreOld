@@ -18,7 +18,9 @@ namespace GroceryStore.Models
         public string ImageUrl { get; set; }
         public string Description { get; set; }
         public string ImageAlt { get; set; }
+        public int CategoryId { get; set; }
 
+        public Category Category { get; set; }
         public Conversion Conversion { get; set; }
         public ICollection<Stock> Stock { get; set; }
     }
