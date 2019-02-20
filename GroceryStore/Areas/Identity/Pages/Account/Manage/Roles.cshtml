@@ -23,7 +23,7 @@
                     </div>
                     <!-- a bit of a hack fix to get correct alignment on certain displays -->
                     <div class="hidden-sm hidden-xs">
-                        <div class="pull-right" style="margin-top:25px;">
+                        <div class="pull-right vertical-align-to-control">
                             <button type="button" class="btn btn-default resetSearch">Reset</button>
                             <button type="submit" class="btn btn-default"><i class="fas fa-search"></i> Search</button>
                         </div>
@@ -59,7 +59,7 @@
             <div class="panel-body">
                 @if (item.Users.Count > 0)
                 {
-                    <dl class="dl-horizontal" style="display:inline-block;">
+                    <dl class="dl-horizontal d-inline-block">
                         <dt>Associated Users</dt>
                         @foreach (var user in item.Users)
                         {

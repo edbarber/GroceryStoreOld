@@ -57,12 +57,12 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             List<OutputModel> output = new List<OutputModel>();
             List<ApplicationRole> roles = _roleManager.Roles.OrderBy(ar => ar.Name).ToList();
 
-            SearchRole = searchRole;
-            SearchUser = searchUser;
+            SearchRole = searchRole?.Trim();
+            SearchUser = searchUser?.Trim();
 
-            if (!string.IsNullOrWhiteSpace(searchRole))
+            if (!string.IsNullOrWhiteSpace(SearchRole))
             {
-                roles = roles.Where(ar => ar.Name.Contains(searchRole, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                roles = roles.Where(ar => ar.Name.Contains(SearchRole, StringComparison.CurrentCultureIgnoreCase)).ToList();
             }
 
             foreach (ApplicationRole currRole in roles)
@@ -76,9 +76,9 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                     Users = _dbCommonFunctionality.GetUsersByRoleId(currRole.Id)
                 };
 
-                if (!string.IsNullOrWhiteSpace(searchUser))
+                if (!string.IsNullOrWhiteSpace(SearchUser))
                 {
-                    outputModel.Users = outputModel.Users.Where(au => au.UserName.Contains(searchUser, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                    outputModel.Users = outputModel.Users.Where(au => au.UserName.Contains(SearchUser, StringComparison.CurrentCultureIgnoreCase)).ToList();
                 }
 
                 output.Add(outputModel);

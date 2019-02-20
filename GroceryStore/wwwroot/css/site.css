@@ -106,3 +106,15 @@ span.details-control-collapsed::before {
 .hidden {
     display: none;
 }
+
+.d-inline-block {
+    display: inline-block;  /* displays as an inline block element */
+}
+
+.vertical-align-to-control {
+    margin-top: 1em;   /* align it so that it lines up vertically with a control on the left or right if label is over control in bootstrap */
+}
+
+.highlight {
+    background-color: yellow;
+}

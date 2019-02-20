@@ -19,35 +19,34 @@ namespace GroceryStore.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string searchName, string searchPrice, string searchWeight, string searchConversionCode)
+        public IActionResult Index(string search = null, bool orderPriceFromHighToLow = false, bool orderPriceFromLowToHigh = false, bool orderAlphabetically = false)
         {
             IndexViewModel model = new IndexViewModel
             {
-                Groceries = _context.Grocery.Include(g => g.Conversion),
-                SearchName = searchName,
-                SearchPrice = searchPrice,
-                SearchWeight = searchWeight,
-                SearchConversionCode = searchConversionCode
+                Search = search?.Trim(),
+                Groceries = _context.Grocery.Include(g => g.Conversion)
             };
 
-            if (!string.IsNullOrWhiteSpace(searchName))
+            if (!string.IsNullOrWhiteSpace(model.Search))
             {
-                model.Groceries = model.Groceries.Where(g => g.Name.Contains(searchName, StringComparison.CurrentCultureIgnoreCase));
+                model.Groceries = model.Groceries.Where(g => g.Name.Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) ||
+                    g.Price.ToString().Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) ||
+                    (g.Weight != null ? g.Weight.ToString().Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) : false) ||
+                    (g.Conversion != null ? g.Conversion.Code.Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) : false) ||
+                    (g.Description != null ? g.Description.Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) : false));
             }
 
-            if (!string.IsNullOrWhiteSpace(searchPrice))
+            if (orderPriceFromHighToLow)
             {
-                model.Groceries = model.Groceries.Where(g => g.Price.ToString().Contains(searchPrice, StringComparison.CurrentCultureIgnoreCase));
+                model.Groceries = model.Groceries.OrderByDescending(g => g.Price);
             }
-
-            if (!string.IsNullOrWhiteSpace(searchWeight))
+            else if (orderPriceFromLowToHigh)
             {
-                model.Groceries = model.Groceries.Where(g => g.Weight.ToString().Contains(searchWeight, StringComparison.CurrentCultureIgnoreCase));
+                model.Groceries = model.Groceries.OrderBy(g => g.Price);
             }
-
-            if (!string.IsNullOrWhiteSpace(searchConversionCode))
+            else if (orderAlphabetically)
             {
-                model.Groceries = model.Groceries.Where(g => g.Conversion.Code.Contains(searchConversionCode, StringComparison.CurrentCultureIgnoreCase));
+                model.Groceries = model.Groceries.OrderBy(g => g.Name);
             }
 
             return View(model);
