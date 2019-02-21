@@ -1,0 +1,88 @@
+﻿@model GroceryStore.Models.HomeViewModels.GroceriesViewModel
+@{
+    ViewData["Title"] = "Groceries";
+}
+
+<h2>Groceries</h2>
+@*<div class="row">
+    <form asp-action="Groceries" asp-controller="Home" method="get">
+        <input name="categoryCode" value="@Model.CategoryCode" type="hidden" />
+        <div class="col-md-3 form-group">
+            <label for="search">Search</label>
+            <div class="form-inline">
+                <input id="search" name="search" class="form-control" value="@Model.Search" />
+                <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+@if (!string.IsNullOrWhiteSpace(Model.Search))
+{
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Search Results for <span class="highlight">@Model.Search</span></h3>
+        </div>
+    </div>
+    @if (Model.Groceries.Count() > 1)
+    { 
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="list-inline">
+                <li class="form-control-static font-weight-bold">Order By</li>
+                <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="true" class="btn">Price (Low to High)</a></li>
+                <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderPriceFromHighToLow="true" class="btn">Price (High to Low)</a></li>
+                <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderAlphabetically="true" class="btn">A-Z (alphabetical)</a></li>
+            </ul>
+        </div>
+    </div>
+    }
+}*@
+<div class="row">
+@if (Model.Groceries.Count() > 0)
+{
+    foreach (var item in Model.Groceries)
+    {
+        <div class="col-md-4">
+            <div class="thumbnail">
+                <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode })">
+                @if (string.IsNullOrWhiteSpace(item.ImageUrl))
+                {
+                    <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" class="thumbnail-size" />
+                }
+                else
+                {
+                    <img src="@item.ImageUrl" alt="@item.ImageAlt" class="thumbnail-size" />
+                }
+                </a>
+                <div class="caption">
+                    <h3>@item.Name</h3>
+                    <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode })" class="btn btn-primary" style="width:100px;">Stock</a>
+                    @if (item.Conversion != null)
+                    {
+                        <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span> per <span class="weight">@string.Format("{0:G29}", item.Weight)</span> <span class="conversionCode">@item.Conversion.Code</span></p>
+                    }
+                    else
+                    {
+                        <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span></p>
+                    }
+
+                    @if (string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <p>N/A</p>
+                    }
+                    else
+                    {
+                        <p>@item.Description</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="col-md-12">
+        <p>There are no items to show.</p>
+    </div>
+}
+</div>

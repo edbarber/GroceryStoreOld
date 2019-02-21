@@ -1,79 +1,22 @@
-﻿@model GroceryStore.Models.HomeViewModels.IndexViewModel
+﻿@model IEnumerable<GroceryStore.Models.Category>
 @{
-    ViewData["Title"] = "Groceries";
+    ViewData["Title"] = "Categories";
 }
 
-<h2>Groceries</h2>
+<h2>Categories</h2>
 <div class="row">
-    <form asp-action="Index" asp-controller="Home" method="get">
-        <div class="col-md-3 form-group">
-            <label for="search">Search</label>
-            <div class="form-inline">
-                <input id="search" name="search" class="form-control" value="@Model.Search" />
-                <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
-            </div>
-        </div>
-    </form>
-</div>
-@if (!string.IsNullOrWhiteSpace(Model.Search))
+@if (Model.Count() > 0)
 {
-    <div class="row">
-        <div class="col-md-12">
-            <h3>Search Results for <span class="highlight">@Model.Search</span></h3>
-        </div>
-    </div>
-    @if (Model.Groceries.Count() > 1)
-    { 
-    <div class="row">
-        <div class="col-md-12">
-            <ul class="list-inline">
-                <li class="form-control-static font-weight-bold">Order By</li>
-                <li><a asp-action="Index" asp-controller="Home" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="true" class="btn">Price (Low to High)</a></li>
-                <li><a asp-action="Index" asp-controller="Home" asp-route-search="@Model.Search" asp-route-orderPriceFromHighToLow="true" class="btn">Price (High to Low)</a></li>
-                <li><a asp-action="Index" asp-controller="Home" asp-route-search="@Model.Search" asp-route-orderAlphabetically="true" class="btn">A-Z (alphabetical)</a></li>
-            </ul>
-        </div>
-    </div>
-    }
-}
-<div class="row">
-@if (Model.Groceries.Count() > 0)
-{
-    foreach (var item in Model.Groceries)
+    foreach (var item in Model)
     {
         <div class="col-md-4">
             <div class="thumbnail">
-                <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId">
-                @if (string.IsNullOrWhiteSpace(item.ImageUrl))
-                {
+                <a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@item.Code">
                     <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" class="thumbnail-size" />
-                }
-                else
-                {
-                    <img src="@item.ImageUrl" alt="@item.ImageAlt" class="thumbnail-size" />
-                }
+                    <div class="caption">
+                        <h3>@item.Name</h3>
+                    </div>
                 </a>
-                <div class="caption">
-                    <h3 class="name">@item.Name</h3>
-                    <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" class="btn btn-primary" style="width:100px;">Stock</a>
-                    @if (item.Conversion != null)
-                    {
-                        <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span> per <span class="weight">@string.Format("{0:G29}", item.Weight)</span> <span class="conversionCode">@item.Conversion.Code</span></p>
-                    }
-                    else
-                    {
-                        <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span></p>
-                    }
-
-                    @if (string.IsNullOrWhiteSpace(item.Description))
-                    {
-                        <p>N/A</p>
-                    }
-                    else
-                    {
-                        <p>@item.Description</p>
-                    }
-                </div>
             </div>
         </div>
     }
@@ -85,30 +28,3 @@ else
     </div>
 }
 </div>
-
-@section Scripts {
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $('.details-control').on('click', function () {
-                var sibling = $(this).next();
-                var child = $(this).children()[0];
-
-                if (!sibling.hasClass('hidden')) {
-                    $(child).removeClass('details-control-open');
-                    $(child).addClass('details-control-collapsed');
-                    sibling.addClass('hidden');
-                }
-                else {
-                    $(child).removeClass('details-control-collapsed');
-                    $(child).addClass('details-control-open');
-                    sibling.removeClass('hidden');
-                }
-            });
-
-            // reset page 
-            $('#resetSearch').on('click', function () {
-                window.location.href = '@Url.Action("Index", "Home")';
-            });
-        });
-    </script>
-}

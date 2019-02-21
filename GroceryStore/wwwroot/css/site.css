@@ -112,7 +112,7 @@ span.details-control-collapsed::before {
 }
 
 .vertical-align-to-control {
-    margin-top: 1em;   /* align it so that it lines up vertically with a control on the left or right if label is over control in bootstrap */
+    margin-top: 25px;   /* align it so that it lines up vertically with a control on the left or right if label is over control in bootstrap */
 }
 
 .highlight {

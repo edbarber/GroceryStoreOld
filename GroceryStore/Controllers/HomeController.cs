@@ -19,13 +19,27 @@ namespace GroceryStore.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string search = null, bool orderPriceFromHighToLow = false, bool orderPriceFromLowToHigh = false, bool orderAlphabetically = false)
+        public async Task<IActionResult> Index()
         {
-            IndexViewModel model = new IndexViewModel
+            List<Category> categories = await _context.Category.Include(c => c.Grocery).Where(c => c.Grocery.Count > 0).ToListAsync();
+            return View(categories);
+        }
+
+        public IActionResult Groceries(string categoryCode = null, string search = null, bool orderPriceFromHighToLow = false, bool orderPriceFromLowToHigh = false, bool orderAlphabetically = false)
+        {
+            ViewData["Search"] = search?.Trim();    // used for search box in layout page
+
+            GroceriesViewModel model = new GroceriesViewModel
             {
                 Search = search?.Trim(),
-                Groceries = _context.Grocery.Include(g => g.Conversion)
+                CategoryCode = categoryCode?.Trim(),
+                Groceries = _context.Grocery.Include(g => g.Conversion).Include(g => g.Category)
             };
+
+            if (!string.IsNullOrWhiteSpace(model.CategoryCode))
+            {
+                model.Groceries = model.Groceries.Where(g => g.Category.Code == model.CategoryCode);
+            }
 
             if (!string.IsNullOrWhiteSpace(model.Search))
             {
@@ -36,6 +50,7 @@ namespace GroceryStore.Controllers
                     (g.Description != null ? g.Description.Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) : false));
             }
 
+            // there will only be one passed in anyway
             if (orderPriceFromHighToLow)
             {
                 model.Groceries = model.Groceries.OrderByDescending(g => g.Price);
@@ -52,13 +67,15 @@ namespace GroceryStore.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Stock(int id)
+        public async Task<IActionResult> Stock(int id, string returnURL)
         {
             try
             {
                 var stock = _context.Stock.Include(s => s.Location).Include(s => s.Location.ProvinceState).Where(s => s.GroceryId == id);
                 var grocery = await _context.Grocery.FirstOrDefaultAsync(g => g.GroceryId == id);
+
                 ViewData["Subtitle"] = grocery.Name;
+                ViewData["ReturnURL"] = returnURL;
 
                 return View(await stock.ToListAsync());
             }
