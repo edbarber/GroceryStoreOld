@@ -30,6 +30,10 @@ namespace GroceryStore.Models
                     .IsRequired()
                     .HasMaxLength(10);
 
+                entity.Property(e => e.ImageAlt).HasMaxLength(50);
+
+                entity.Property(e => e.ImageUrl).HasColumnName("ImageURL");
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);

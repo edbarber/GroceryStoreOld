@@ -12,7 +12,14 @@
         <div class="col-md-4">
             <div class="thumbnail">
                 <a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@item.Code">
-                    <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" class="thumbnail-size" />
+                    @if (string.IsNullOrWhiteSpace(item.ImageUrl))
+                    {
+                        <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" class="thumbnail-size" />
+                    }
+                    else
+                    {
+                        <img src="@item.ImageUrl" alt="@item.ImageAlt" class="thumbnail-size" />
+                    }
                     <div class="caption">
                         <h3>@item.Name</h3>
                     </div>
