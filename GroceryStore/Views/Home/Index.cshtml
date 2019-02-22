@@ -9,16 +9,16 @@
 {
     foreach (var item in Model)
     {
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="thumbnail">
-                <a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@item.Code">
+                <a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@item.Code" class="link-disable-underline">
                     @if (string.IsNullOrWhiteSpace(item.ImageUrl))
                     {
-                        <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" class="thumbnail-size" />
+                        <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" />
                     }
                     else
                     {
-                        <img src="@item.ImageUrl" alt="@item.ImageAlt" class="thumbnail-size" />
+                        <img src="@item.ImageUrl" alt="@item.ImageAlt" />
                     }
                     <div class="caption">
                         <h3>@item.Name</h3>

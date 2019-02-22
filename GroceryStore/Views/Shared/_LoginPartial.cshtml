@@ -6,19 +6,23 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm" class="navbar-right">
+        <!-- style attributes used to fix alignment issues on certain devices -->
         <ul class="nav navbar-nav navbar-right">
-            <li class="navbar-text">
-                @{
-                    var user = await UserManager.GetUserAsync(User);
-                    string firstName = user.FirstName;
-                }
+            @{
+                var user = await UserManager.GetUserAsync(User);
+                string firstName = user.FirstName;
+            }
+            <li class="navbar-text hidden-sm hidden-xs">
+                Hello @firstName!
+            </li>
+            <li class="navbar-text hidden-lg hidden-md" style="margin-left:15px;">
                 Hello @firstName!
             </li>
             <li>
                 <a asp-area="Identity" asp-page="/Account/Manage/Index">Manage Account</a>
             </li>
             <li>
-                <button type="submit" class="btn btn-link navbar-btn navbar-link">Logout</button>
+                <button type="submit" class="btn btn-link navbar-btn navbar-link" style="margin-right:15px;">Logout</button>
             </li>
         </ul>
     </form>

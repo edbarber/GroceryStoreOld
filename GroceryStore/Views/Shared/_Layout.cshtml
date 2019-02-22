@@ -54,6 +54,7 @@
                 <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Grocery Store</a>
             </div>
             <div class="navbar-collapse collapse">
+                <partial name="_LoginPartial" />
                 <form asp-action="Groceries" class="navbar-form navbar-right" asp-controller="Home" method="get">
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="Search" name="search" value="@ViewData["Search"]">
@@ -64,7 +65,6 @@
                         </div>
                     </div>
                 </form>
-                <partial name="_LoginPartial" />
             </div>
         </div>
     </nav>

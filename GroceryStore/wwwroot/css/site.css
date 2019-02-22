@@ -37,11 +37,6 @@ body {
 }
 
 /* Custom CSS */
-.thumbnail-size {
-    max-height: 200px;
-    max-width: 200px;
-}
-
 .font-weight-bold {
     font-weight: bold;
 }
@@ -100,6 +95,10 @@ span.details-control-collapsed::before {
 .link-disabled {
     cursor: not-allowed;
     opacity: 0.5;
+    text-decoration: none;
+}
+
+.link-disable-underline:hover, .link-disable-underline:focus {
     text-decoration: none;
 }
 
