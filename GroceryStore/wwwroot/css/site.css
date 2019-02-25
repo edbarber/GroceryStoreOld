@@ -135,6 +135,24 @@ span.details-control-collapsed::before {
     width: 100%;    /* force image into div; doesn't work alone by default */
 }
 
+@media only screen and (min-width: 1200px) {
+    .modal-dialog.modal-dialog-wide {
+        width: 1200px;
+    }
+}
+
+@media only screen and (max-width: 1199px) {
+    .modal-dialog.modal-dialog-wide {
+        width: 100%;
+        margin: 10px;
+    }
+}
+
+.modal-dialog.modal-dialog-wide img {
+    max-width: 320px;
+    max-height: 320px;
+}
+
 .highlight {
     background-color: yellow;
 }

@@ -35,7 +35,7 @@
     {
         <div class="col-md-3">
             <div class="thumbnail">
-                <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode })">
+                <a href="#" data-toggle="modal" data-target="#groceryDetail_@item.GroceryId">
                     <div class="selectable-image">
                         <div class="selectable-image-info">
                             Details <i class="glyphicon glyphicon-search"></i>
@@ -52,7 +52,6 @@
                 </a>
                 <div class="caption">
                     <h3>@item.Name</h3>
-                    <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode })" class="btn btn-primary" style="width:100px;">Stock</a>
                     @if (item.Conversion != null)
                     {
                         <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span> per <span class="weight">@string.Format("{0:G29}", item.Weight)</span> <span class="conversionCode">@item.Conversion.Code</span></p>
@@ -61,15 +60,49 @@
                     {
                         <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span></p>
                     }
-
-                    @*@if (string.IsNullOrWhiteSpace(item.Description))
-                    {
-                        <p>N/A</p>
-                    }
-                    else
-                    {
-                        <p>@item.Description</p>
-                    }*@
+                </div>
+            </div>
+        </div>
+        <div id="groceryDetail_@item.GroceryId" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-dialog-wide">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">@item.Name</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    @{
+                                        string description = !string.IsNullOrWhiteSpace(item.Description) ? item.Description : "N/A";
+                                    }
+                                    <p class="text-center">@description</p>
+                                    @if (item.Conversion != null)
+                                    {
+                                        <p class="font-weight-bold text-center"><span class="price">@item.Price.ToString("C2")</span> per <span class="weight">@string.Format("{0:G29}", item.Weight)</span> <span class="conversionCode">@item.Conversion.Code</span></p>
+                                    }
+                                    else
+                                    {
+                                        <p class="font-weight-bold text-center"><span class="price">@item.Price.ToString("C2")</span></p>
+                                    }
+                                    <div class="text-center">
+                                        <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode })">Stock</a>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-center">
+                                @if (string.IsNullOrWhiteSpace(item.ImageUrl))
+                                {
+                                    <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" />
+                                }
+                                else
+                                {
+                                    <img src="@item.ImageUrl" alt="@item.ImageAlt" />
+                                }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
