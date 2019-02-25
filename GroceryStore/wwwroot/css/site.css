@@ -114,6 +114,27 @@ span.details-control-collapsed::before {
     margin-top: 25px;   /* align it so that it lines up vertically with a control on the left or right if label is over control in bootstrap */
 }
 
+.selectable-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.selectable-image > .selectable-image-info {
+    position: absolute;
+    padding: 5px;
+    background-color: #e8e8e8;
+    text-decoration: none;  /* incase inside link */
+    border-radius: 5px;
+    color: black;
+    opacity: 0.8;
+    z-index: 1; /* proper sort order */
+}
+
+.selectable-image > img {
+    width: 100%;    /* force image into div; doesn't work alone by default */
+}
+
 .highlight {
     background-color: yellow;
 }

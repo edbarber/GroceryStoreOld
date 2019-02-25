@@ -36,14 +36,19 @@
         <div class="col-md-3">
             <div class="thumbnail">
                 <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode })">
-                @if (string.IsNullOrWhiteSpace(item.ImageUrl))
-                {
-                    <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" />
-                }
-                else
-                {
-                    <img src="@item.ImageUrl" alt="@item.ImageAlt" />
-                }
+                    <div class="selectable-image">
+                        <div class="selectable-image-info">
+                            Details <i class="glyphicon glyphicon-search"></i>
+                        </div>
+                        @if (string.IsNullOrWhiteSpace(item.ImageUrl))
+                        {
+                            <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" />
+                        }
+                        else
+                        {
+                            <img src="@item.ImageUrl" alt="@item.ImageAlt" />
+                        }
+                    </div>
                 </a>
                 <div class="caption">
                     <h3>@item.Name</h3>
@@ -57,14 +62,14 @@
                         <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span></p>
                     }
 
-                    @if (string.IsNullOrWhiteSpace(item.Description))
+                    @*@if (string.IsNullOrWhiteSpace(item.Description))
                     {
                         <p>N/A</p>
                     }
                     else
                     {
                         <p>@item.Description</p>
-                    }
+                    }*@
                 </div>
             </div>
         </div>
