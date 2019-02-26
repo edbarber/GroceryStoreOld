@@ -144,13 +144,23 @@ span.details-control-collapsed::before {
 @media only screen and (max-width: 1199px) {
     .modal-dialog.modal-dialog-wide {
         width: 100%;
-        margin: 10px;
+        margin: 10px;   /* override any margin for smaller screen sizes */
     }
 }
 
-.modal-dialog.modal-dialog-wide img {
-    max-width: 320px;
-    max-height: 320px;
+@media only screen and (min-width: 577px) {
+    .modal-dialog.modal-dialog-wide img {
+        max-width: 320px;
+        max-height: 320px;
+    }
+}
+
+/* scale image lower on smaller phones */
+@media only screen and (max-width: 576px) {
+    .modal-dialog.modal-dialog-wide img {
+        max-width: 240px;
+        max-height: 240px;
+    }
 }
 
 .highlight {
