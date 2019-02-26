@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using GroceryStore.Models;
 using Microsoft.EntityFrameworkCore;
 using GroceryStore.Models.HomeViewModels;
+using Microsoft.AspNetCore.Http;
 
 namespace GroceryStore.Controllers
 {
@@ -32,16 +33,25 @@ namespace GroceryStore.Controllers
             }
         }
 
-        public async Task<IActionResult> Groceries(string categoryCode = null, string search = null, bool orderPriceFromHighToLow = false, bool orderPriceFromLowToHigh = false, bool orderAlphabetically = false)
+        public async Task<IActionResult> Groceries(string categoryCode = null, string search = null, bool? orderPriceFromHighToLow = null, bool? orderPriceFromLowToHigh = null, bool? orderAlphabetically = null)
         {
             try
             {
-                ViewData["Search"] = search?.Trim();    // used for search box in layout page
+                // both category code and search are optional, however, either one must exist
+                if (string.IsNullOrWhiteSpace(categoryCode) && string.IsNullOrWhiteSpace(search))
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+
+                HttpContext.Session.SetString("Search", search?.Trim() ?? string.Empty);    // used to persist search box value in layout page
 
                 GroceriesViewModel model = new GroceriesViewModel
                 {
                     Search = search?.Trim(),
                     CategoryCode = categoryCode?.Trim(),
+                    OrderPriceFromLowToHigh = orderPriceFromLowToHigh,
+                    OrderPriceFromHighToLow = orderPriceFromHighToLow,
+                    OrderAlphabetically = orderAlphabetically,
                     Groceries = _context.Grocery.Include(g => g.Conversion).Include(g => g.Category)
                 };
 
@@ -61,22 +71,22 @@ namespace GroceryStore.Controllers
                 }
 
                 // there will only be one passed in anyway
-                if (orderPriceFromHighToLow)
+                if (orderPriceFromHighToLow == true)
                 {
                     model.Groceries = model.Groceries.OrderByDescending(g => g.Price);
                 }
-                else if (orderPriceFromLowToHigh)
+                else if (orderPriceFromLowToHigh == true)
                 {
                     model.Groceries = model.Groceries.OrderBy(g => g.Price);
                 }
-                else if (orderAlphabetically)
+                else if (orderAlphabetically == true)
                 {
                     model.Groceries = model.Groceries.OrderBy(g => g.Name);
                 }
 
                 return View(model);
             }
-            catch
+            catch 
             {
                 return RedirectToAction("Index", "Error");
             }

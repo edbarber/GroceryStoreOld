@@ -37,7 +37,7 @@
             <div class="thumbnail">
                 <a href="#" data-toggle="modal" data-target="#groceryDetail_@item.GroceryId">
                     <div class="selectable-image">
-                        <div class="selectable-image-info">
+                        <div class="selectable-image-info hidden">
                             Details <i class="glyphicon glyphicon-search"></i>
                         </div>
                         @if (string.IsNullOrWhiteSpace(item.ImageUrl))
@@ -87,7 +87,7 @@
                                         <p class="font-weight-bold text-center"><span class="price">@item.Price.ToString("C2")</span></p>
                                     }
                                     <div class="text-center">
-                                        <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode })">Stock</a>
+                                        <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode, search = Model.Search, orderPriceFromHighToLow = Model.OrderPriceFromHighToLow, orderPriceFromLowToHigh = Model.OrderPriceFromLowToHigh, orderAlphabetically = Model.OrderAlphabetically })">Stock</a>
                                     </div>
                                 </div>
                                 <div class="col-md-6 text-center">

@@ -9,6 +9,9 @@ namespace GroceryStore.Models.HomeViewModels
     {
         public string CategoryCode { get; set; }
         public string Search { get; set; }
+        public bool? OrderPriceFromHighToLow { get; set; }
+        public bool? OrderPriceFromLowToHigh { get; set; }
+        public bool? OrderAlphabetically { get; set; }
         public IEnumerable<Grocery> Groceries { get; set; }
     }
 }

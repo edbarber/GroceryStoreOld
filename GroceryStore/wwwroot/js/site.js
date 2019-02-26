@@ -22,10 +22,10 @@ $(document).ready(function () {
     // use current target as it should pass in the correct element
     $('.selectable-image').on({
         mouseenter: function (event) {
-            toggleSelectableImage(event.currentTarget);
+            selectableImageOnHover(event.currentTarget);
         },
         mouseleave: function (event) {
-            toggleSelectableImage(event.currentTarget);
+            selectableImageOnExit(event.currentTarget);
         }
     });
 });
@@ -47,17 +47,19 @@ function centerSelectableImageInfo(element) {
     $(element).css('margin-left', marginLeft.toString() + '%');
 }
 
-function toggleSelectableImage(element) {
+function selectableImageOnHover(element) {
     var image = $(element).children('img').first();
     var info = $(element).children('.selectable-image-info').first();
 
-    if (image.css('opacity') == undefined || image.css('opacity') > 0.5) {
-        image.css('opacity', 0.5);
-        info.removeClass('hidden');
-    }
-    else {
-        image.css('opacity', 1);
-        info.addClass('hidden');
-    }
+    image.css('opacity', 0.5);
+    info.removeClass('hidden');
+}
+
+function selectableImageOnExit(element) {
+    var image = $(element).children('img').first();
+    var info = $(element).children('.selectable-image-info').first();
+
+    image.css('opacity', 1);
+    info.addClass('hidden');
 }
 // ---------------------------------------------------------
