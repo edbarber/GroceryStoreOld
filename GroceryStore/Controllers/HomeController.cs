@@ -19,48 +19,78 @@ namespace GroceryStore.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string searchName, string searchPrice, string searchWeight, string searchConversionCode)
+        public async Task<IActionResult> Index()
         {
-            IndexViewModel model = new IndexViewModel
+            try
             {
-                Groceries = _context.Grocery.Include(g => g.Conversion),
-                SearchName = searchName,
-                SearchPrice = searchPrice,
-                SearchWeight = searchWeight,
-                SearchConversionCode = searchConversionCode
-
-            };
-
-            if (!string.IsNullOrWhiteSpace(searchName))
-            {
-                model.Groceries = model.Groceries.Where(g => g.Name.Contains(searchName, StringComparison.CurrentCultureIgnoreCase));
+                List<Category> categories = await _context.Category.Include(c => c.Grocery).Where(c => c.Grocery.Count > 0).ToListAsync();
+                return View(categories);
             }
-
-            if (!string.IsNullOrWhiteSpace(searchPrice))
+            catch
             {
-                model.Groceries = model.Groceries.Where(g => g.Price.ToString().Contains(searchPrice, StringComparison.CurrentCultureIgnoreCase));
+                return RedirectToAction("Index", "Error");
             }
-
-            if (!string.IsNullOrWhiteSpace(searchWeight))
-            {
-                model.Groceries = model.Groceries.Where(g => g.Weight.ToString().Contains(searchWeight, StringComparison.CurrentCultureIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(searchConversionCode))
-            {
-                model.Groceries = model.Groceries.Where(g => g.Conversion.Code.Contains(searchConversionCode, StringComparison.CurrentCultureIgnoreCase));
-            }
-
-            return View(model);
         }
 
-        public async Task<IActionResult> Stock(int id)
+        public async Task<IActionResult> Groceries(string categoryCode = null, string search = null, bool orderPriceFromHighToLow = false, bool orderPriceFromLowToHigh = false, bool orderAlphabetically = false)
+        {
+            try
+            {
+                ViewData["Search"] = search?.Trim();    // used for search box in layout page
+
+                GroceriesViewModel model = new GroceriesViewModel
+                {
+                    Search = search?.Trim(),
+                    CategoryCode = categoryCode?.Trim(),
+                    Groceries = _context.Grocery.Include(g => g.Conversion).Include(g => g.Category)
+                };
+
+                if (!string.IsNullOrWhiteSpace(model.CategoryCode))
+                {
+                    model.Groceries = model.Groceries.Where(g => g.Category.Code == model.CategoryCode);
+                    ViewData["Title"] = (await _context.Category.FirstOrDefaultAsync(c => c.Code == model.CategoryCode)).Name;
+                }
+
+                if (!string.IsNullOrWhiteSpace(model.Search))
+                {
+                    model.Groceries = model.Groceries.Where(g => g.Name.Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) ||
+                        g.Price.ToString().Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) ||
+                        (g.Weight != null ? g.Weight.ToString().Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) : false) ||
+                        (g.Conversion != null ? g.Conversion.Code.Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) : false) ||
+                        (g.Description != null ? g.Description.Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) : false));
+                }
+
+                // there will only be one passed in anyway
+                if (orderPriceFromHighToLow)
+                {
+                    model.Groceries = model.Groceries.OrderByDescending(g => g.Price);
+                }
+                else if (orderPriceFromLowToHigh)
+                {
+                    model.Groceries = model.Groceries.OrderBy(g => g.Price);
+                }
+                else if (orderAlphabetically)
+                {
+                    model.Groceries = model.Groceries.OrderBy(g => g.Name);
+                }
+
+                return View(model);
+            }
+            catch
+            {
+                return RedirectToAction("Index", "Error");
+            }
+        }
+
+        public async Task<IActionResult> Stock(int id, string returnURL)
         {
             try
             {
                 var stock = _context.Stock.Include(s => s.Location).Include(s => s.Location.ProvinceState).Where(s => s.GroceryId == id);
                 var grocery = await _context.Grocery.FirstOrDefaultAsync(g => g.GroceryId == id);
+
                 ViewData["Subtitle"] = grocery.Name;
+                ViewData["ReturnURL"] = returnURL;
 
                 return View(await stock.ToListAsync());
             }

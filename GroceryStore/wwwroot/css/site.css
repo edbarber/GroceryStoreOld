@@ -19,7 +19,7 @@ body {
 }
 
 /* Make .svg files in the carousel display properly in older browsers */
-.carousel-inner .item img[src$=".svg"] {
+.carousel-inner-item-svg-img {
     width: 100%;
 }
 
@@ -37,11 +37,6 @@ body {
 }
 
 /* Custom CSS */
-.thumbnail-size {
-    max-height: 200px;
-    max-width: 200px;
-}
-
 .font-weight-bold {
     font-weight: bold;
 }
@@ -97,13 +92,67 @@ span.details-control-collapsed::before {
     color: #41b941;
 }
 
-/* make sure it's a link */
-a.link-disabled {
+.link-disabled {
     cursor: not-allowed;
     opacity: 0.5;
     text-decoration: none;
 }
 
+.link-disable-underline:hover, .link-disable-underline:focus {
+    text-decoration: none;
+}
+
 .hidden {
     display: none;
+}
+
+.d-inline-block {
+    display: inline-block;  /* displays as an inline block element */
+}
+
+.vertical-align-to-control {
+    margin-top: 25px;   /* align it so that it lines up vertically with a control on the left or right if label is over control in bootstrap */
+}
+
+.selectable-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.selectable-image > .selectable-image-info {
+    position: absolute;
+    padding: 5px;
+    background-color: #e8e8e8;
+    text-decoration: none;  /* incase inside link */
+    border-radius: 5px;
+    color: black;
+    opacity: 0.8;
+    z-index: 1; /* proper sort order */
+}
+
+.selectable-image > img {
+    width: 100%;    /* force image into div; doesn't work alone by default */
+}
+
+@media only screen and (min-width: 1200px) {
+    .modal-dialog.modal-dialog-wide {
+        width: 1200px;
+    }
+}
+
+@media only screen and (max-width: 1199px) {
+    .modal-dialog.modal-dialog-wide {
+        width: 100%;
+        margin: 10px;
+    }
+}
+
+.modal-dialog.modal-dialog-wide img {
+    max-width: 320px;
+    max-height: 320px;
+}
+
+.highlight {
+    background-color: yellow;
 }

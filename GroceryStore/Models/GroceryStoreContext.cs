@@ -15,6 +15,7 @@ namespace GroceryStore.Models
         {
         }
 
+        public virtual DbSet<Category> Category { get; set; }
         public virtual DbSet<Conversion> Conversion { get; set; }
         public virtual DbSet<Grocery> Grocery { get; set; }
         public virtual DbSet<Location> Location { get; set; }
@@ -23,6 +24,21 @@ namespace GroceryStore.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.Property(e => e.Code)
+                    .IsRequired()
+                    .HasMaxLength(10);
+
+                entity.Property(e => e.ImageAlt).HasMaxLength(50);
+
+                entity.Property(e => e.ImageUrl).HasColumnName("ImageURL");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
+
             modelBuilder.Entity<Conversion>(entity =>
             {
                 entity.Property(e => e.Code)
@@ -47,6 +63,12 @@ namespace GroceryStore.Models
                 entity.Property(e => e.Price).HasColumnType("money");
 
                 entity.Property(e => e.Weight).HasColumnType("decimal(18, 3)");
+
+                entity.HasOne(d => d.Category)
+                    .WithMany(p => p.Grocery)
+                    .HasForeignKey(d => d.CategoryId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Grocery_Category_FK");
 
                 entity.HasOne(d => d.Conversion)
                     .WithMany(p => p.Grocery)
