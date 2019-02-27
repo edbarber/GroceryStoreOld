@@ -135,6 +135,10 @@ span.details-control-collapsed::before {
     width: 100%;    /* force image into div; doesn't work alone by default */
 }
 
+.badge a, .badge a:hover, .badge a:focus {
+    color: inherit; /* disable button like link when anchor element is nested inside */
+}
+
 @media only screen and (min-width: 1200px) {
     .modal-dialog.modal-dialog-wide {
         width: 1200px;

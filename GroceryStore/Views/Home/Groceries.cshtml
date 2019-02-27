@@ -15,46 +15,60 @@
 {
     <div class="row">
         <div class="col-md-12">
-            <h3>Search Results for <span class="highlight">@Model.Search</span></h3>
+            @if (Model.Category != null)
+            {
+                <p><span class="font-weight-bold">Search Results</span> for <span class="highlight font-weight-bold">@Model.Search</span> and <span class="badge">@Model.Category.Name <a asp-action="Groceries" asp-controller="Home" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="@Model.OrderPriceFromLowToHigh" asp-route-orderPriceFromHighToLow="@Model.OrderPriceFromHighToLow" asp-route-orderAlphabetically="@Model.OrderAlphabetically"><i class="fas fa-times-circle"></i></a></span></p>
+            }
+            else
+            {
+                <p><span class="font-weight-bold">Search Results</span> for <span class="highlight font-weight-bold">@Model.Search</span></p>
+            }
+
             @if (Model.Groceries.Count() > 1)
             {
                 <ul class="list-inline">
                     <li class="font-weight-bold">Order By</li>
-                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="true">Price (Low to High)</a></li>
-                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderPriceFromHighToLow="true">Price (High to Low)</a></li>
-                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderAlphabetically="true">A-Z (alphabetical)</a></li>
+                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.Category?.Code" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="true">Price (Low to High)</a></li>
+                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.Category?.Code" asp-route-search="@Model.Search" asp-route-orderPriceFromHighToLow="true">Price (High to Low)</a></li>
+                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.Category?.Code" asp-route-search="@Model.Search" asp-route-orderAlphabetically="true">A-Z (alphabetical)</a></li>
                 </ul>
             }
         </div>
     </div>
 }
 <div class="row">
-    <div class="col-md-3">
-        <div class="thumbnail">
-            <div class="caption">
-                <h4>Categories</h4>
-                <hr />
-                <ul class="list-unstyled">
-                @foreach (var item in Model.ValidCategories)
-                {
-                    string categoryUrl = Url.Action("Groceries", "Home", new { categoryCode = item.Key.Code, search = Model.Search, orderPriceFromHighToLow = Model.OrderPriceFromHighToLow, orderPriceFromLowToHigh = Model.OrderPriceFromLowToHigh, orderAlphabetically = Model.OrderAlphabetically });
+@if (Model.Groceries.Count() > 0)
+{
+    if (Model.ValidCategories.Count > 1)
+    {
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <div class="caption">
+                    <h4>Categories</h4>
+                    <hr />
+                    <ul class="list-unstyled">
+                    @foreach (var item in Model.ValidCategories)
+                    {
+                        string categoryUrl = Url.Action("Groceries", "Home", new { categoryCode = item.Key.Code, search = Model.Search, orderPriceFromHighToLow = Model.OrderPriceFromHighToLow, orderPriceFromLowToHigh = Model.OrderPriceFromLowToHigh, orderAlphabetically = Model.OrderAlphabetically });
 
-                    if (item.Value != null)
-                    {
-                        <li><a href="@categoryUrl">@item.Key.Name (@item.Value)</a></li>
+                        if (item.Value != null)
+                        {
+                            <li><a href="@categoryUrl">@item.Key.Name (@item.Value)</a></li>
+                        }
+                        else
+                        {
+                            <li><a href="@categoryUrl">@item.Key.Name</a></li>
+                        }
                     }
-                    else
-                    {
-                        <li><a href="@categoryUrl">@item.Key.Name</a></li>
-                    }
-                }
-                </ul>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-9">
-    @if (Model.Groceries.Count() > 0)
-    {
+    }
+
+    string columnType = Model.ValidCategories.Count > 1 ? "col-md-9" : "col-md-12";
+
+    <div class="@columnType">
         <!-- use row class to remove padding around the inside edges of this column -->
         <div class="row">
         @foreach (var item in Model.Groceries)
@@ -113,7 +127,7 @@
                                             <p class="font-weight-bold text-center"><span class="price">@item.Price.ToString("C2")</span></p>
                                         }
                                         <div class="text-center">
-                                            <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode, search = Model.Search, orderPriceFromHighToLow = Model.OrderPriceFromHighToLow, orderPriceFromLowToHigh = Model.OrderPriceFromLowToHigh, orderAlphabetically = Model.OrderAlphabetically })">Stock</a>
+                                            <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.Category?.Code, search = Model.Search, orderPriceFromHighToLow = Model.OrderPriceFromHighToLow, orderPriceFromLowToHigh = Model.OrderPriceFromLowToHigh, orderAlphabetically = Model.OrderAlphabetically })">Stock</a>
                                         </div>
                                     </div>
                                     <div class="col-md-6 text-center">
@@ -134,10 +148,12 @@
             </div>
         }
         </div>
-    }
-    else
-    {
-        <p>There are no items to show.</p>
-    }
     </div>
+}
+else
+{
+    <div class="col-md-12">
+        <p>There are no items to show.</p>
+    </div>
+}
 </div>

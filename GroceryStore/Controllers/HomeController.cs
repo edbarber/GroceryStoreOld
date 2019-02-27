@@ -45,17 +45,19 @@ namespace GroceryStore.Controllers
 
                 HttpContext.Session.SetString("Search", search?.Trim() ?? string.Empty);    // used to persist search box value in layout page
 
+                categoryCode = categoryCode?.Trim();
+
                 GroceriesViewModel model = new GroceriesViewModel
                 {
                     Search = search?.Trim(),
-                    CategoryCode = categoryCode?.Trim(),
+                    Category =  await _context.Category.FirstOrDefaultAsync(c => c.Code == categoryCode),
                     OrderPriceFromLowToHigh = orderPriceFromLowToHigh,
                     OrderPriceFromHighToLow = orderPriceFromHighToLow,
                     OrderAlphabetically = orderAlphabetically,
                     Groceries = _context.Grocery.Include(g => g.Conversion).Include(g => g.Category)
                 };
 
-                bool searchExists = !string.IsNullOrWhiteSpace(model.Search);
+                bool searchExists = !string.IsNullOrWhiteSpace(model.Search);   // cache value instead of doing string comparison every category
 
                 if (searchExists)
                 {
@@ -68,10 +70,10 @@ namespace GroceryStore.Controllers
 
                 model.ValidCategories = model.Groceries.GroupBy(g => g.CategoryId).Select(g => new KeyValuePair<Category, int?>(g.FirstOrDefault().Category, searchExists ? g.Count() : (int?)null)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                   
-                if (!string.IsNullOrWhiteSpace(model.CategoryCode))
+                if (model.Category != null)
                 {
-                    model.Groceries = model.Groceries.Where(g => g.Category.Code == model.CategoryCode);
-                    ViewData["Title"] = (await _context.Category.FirstOrDefaultAsync(c => c.Code == model.CategoryCode)).Name;
+                    model.Groceries = model.Groceries.Where(g => g.Category.Code == model.Category.Code);
+                    ViewData["Title"] = (await _context.Category.FirstOrDefaultAsync(c => c.Code == model.Category.Code)).Name;
                 }
 
                 // there will only be one passed in anyway

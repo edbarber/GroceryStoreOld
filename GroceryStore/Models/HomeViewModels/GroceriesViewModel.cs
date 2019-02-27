@@ -7,7 +7,7 @@ namespace GroceryStore.Models.HomeViewModels
 {
     public class GroceriesViewModel
     {
-        public string CategoryCode { get; set; }
+        public Category Category { get; set; }
         public string Search { get; set; }
         public bool? OrderPriceFromHighToLow { get; set; }
         public bool? OrderPriceFromLowToHigh { get; set; }
