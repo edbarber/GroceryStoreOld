@@ -13,5 +13,6 @@ namespace GroceryStore.Models.HomeViewModels
         public bool? OrderPriceFromLowToHigh { get; set; }
         public bool? OrderAlphabetically { get; set; }
         public IEnumerable<Grocery> Groceries { get; set; }
+        public Dictionary<Category, int?> ValidCategories { get; set; }  // int will show the number of results for that category or null if not part of search results
     }
 }

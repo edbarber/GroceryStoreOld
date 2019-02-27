@@ -6,112 +6,138 @@
     }
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="row">
+    <div class="col-md-12">
+        <h2>@ViewData["Title"]</h2>
+    </div>
+</div>
 @if (!string.IsNullOrWhiteSpace(Model.Search))
 {
     <div class="row">
         <div class="col-md-12">
             <h3>Search Results for <span class="highlight">@Model.Search</span></h3>
+            @if (Model.Groceries.Count() > 1)
+            {
+                <ul class="list-inline">
+                    <li class="font-weight-bold">Order By</li>
+                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="true">Price (Low to High)</a></li>
+                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderPriceFromHighToLow="true">Price (High to Low)</a></li>
+                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderAlphabetically="true">A-Z (alphabetical)</a></li>
+                </ul>
+            }
         </div>
     </div>
-    @if (Model.Groceries.Count() > 1)
-    { 
-    <div class="row">
-        <div class="col-md-12">
-            <ul class="list-inline">
-                <li class="font-weight-bold">Order By</li>
-                <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="true">Price (Low to High)</a></li>
-                <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderPriceFromHighToLow="true">Price (High to Low)</a></li>
-                <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.CategoryCode" asp-route-search="@Model.Search" asp-route-orderAlphabetically="true">A-Z (alphabetical)</a></li>
-            </ul>
-        </div>
-    </div>
-    }
 }
 <div class="row">
-@if (Model.Groceries.Count() > 0)
-{
-    foreach (var item in Model.Groceries)
-    {
-        <div class="col-md-3">
-            <div class="thumbnail">
-                <a href="#" data-toggle="modal" data-target="#groceryDetail_@item.GroceryId">
-                    <div class="selectable-image">
-                        <div class="selectable-image-info hidden">
-                            Details <i class="glyphicon glyphicon-search"></i>
-                        </div>
-                        @if (string.IsNullOrWhiteSpace(item.ImageUrl))
-                        {
-                            <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" />
-                        }
-                        else
-                        {
-                            <img src="@item.ImageUrl" alt="@item.ImageAlt" />
-                        }
-                    </div>
-                </a>
-                <div class="caption">
-                    <h3>@item.Name</h3>
-                    @if (item.Conversion != null)
+    <div class="col-md-3">
+        <div class="thumbnail">
+            <div class="caption">
+                <h4>Categories</h4>
+                <hr />
+                <ul class="list-unstyled">
+                @foreach (var item in Model.ValidCategories)
+                {
+                    string categoryUrl = Url.Action("Groceries", "Home", new { categoryCode = item.Key.Code, search = Model.Search, orderPriceFromHighToLow = Model.OrderPriceFromHighToLow, orderPriceFromLowToHigh = Model.OrderPriceFromLowToHigh, orderAlphabetically = Model.OrderAlphabetically });
+
+                    if (item.Value != null)
                     {
-                        <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span> per <span class="weight">@string.Format("{0:G29}", item.Weight)</span> <span class="conversionCode">@item.Conversion.Code</span></p>
+                        <li><a href="@categoryUrl">@item.Key.Name (@item.Value)</a></li>
                     }
                     else
                     {
-                        <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span></p>
+                        <li><a href="@categoryUrl">@item.Key.Name</a></li>
                     }
-                </div>
+                }
+                </ul>
             </div>
         </div>
-        <div id="groceryDetail_@item.GroceryId" class="modal fade" role="dialog">
-            <div class="modal-dialog modal-dialog-wide">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">@item.Name</h4>
+    </div>
+    <div class="col-md-9">
+    @if (Model.Groceries.Count() > 0)
+    {
+        <!-- use row class to remove padding around the inside edges of this column -->
+        <div class="row">
+        @foreach (var item in Model.Groceries)
+        {
+            <div class="col-md-3">
+                <div class="thumbnail">
+                    <a href="#" data-toggle="modal" data-target="#groceryDetail_@item.GroceryId">
+                        <div class="selectable-image">
+                            <div class="selectable-image-info hidden">
+                                Details <i class="glyphicon glyphicon-search"></i>
+                            </div>
+                            @if (string.IsNullOrWhiteSpace(item.ImageUrl))
+                            {
+                                <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" />
+                            }
+                            else
+                            {
+                                <img src="@item.ImageUrl" alt="@item.ImageAlt" />
+                            }
+                        </div>
+                    </a>
+                    <div class="caption">
+                        <h4>@item.Name</h4>
+                        @if (item.Conversion != null)
+                        {
+                            <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span> per <span class="weight">@string.Format("{0:G29}", item.Weight)</span> <span class="conversionCode">@item.Conversion.Code</span></p>
+                        }
+                        else
+                        {
+                            <p class="font-weight-bold"><span class="price">@item.Price.ToString("C2")</span></p>
+                        }
                     </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="col-md-6">
-                                    @{
-                                        string description = !string.IsNullOrWhiteSpace(item.Description) ? item.Description : "N/A";
-                                    }
-                                    <p class="text-center">@description</p>
-                                    @if (item.Conversion != null)
-                                    {
-                                        <p class="font-weight-bold text-center"><span class="price">@item.Price.ToString("C2")</span> per <span class="weight">@string.Format("{0:G29}", item.Weight)</span> <span class="conversionCode">@item.Conversion.Code</span></p>
-                                    }
-                                    else
-                                    {
-                                        <p class="font-weight-bold text-center"><span class="price">@item.Price.ToString("C2")</span></p>
-                                    }
-                                    <div class="text-center">
-                                        <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode, search = Model.Search, orderPriceFromHighToLow = Model.OrderPriceFromHighToLow, orderPriceFromLowToHigh = Model.OrderPriceFromLowToHigh, orderAlphabetically = Model.OrderAlphabetically })">Stock</a>
+                </div>
+            </div>
+            <div id="groceryDetail_@item.GroceryId" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-dialog-wide">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">@item.Name</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        @{
+                                            string description = !string.IsNullOrWhiteSpace(item.Description) ? item.Description : "N/A";
+                                        }
+                                        <p class="text-center">@description</p>
+                                        @if (item.Conversion != null)
+                                        {
+                                            <p class="font-weight-bold text-center"><span class="price">@item.Price.ToString("C2")</span> per <span class="weight">@string.Format("{0:G29}", item.Weight)</span> <span class="conversionCode">@item.Conversion.Code</span></p>
+                                        }
+                                        else
+                                        {
+                                            <p class="font-weight-bold text-center"><span class="price">@item.Price.ToString("C2")</span></p>
+                                        }
+                                        <div class="text-center">
+                                            <a asp-action="Stock" asp-controller="Home" asp-route-id="@item.GroceryId" asp-route-returnURL="@Url.Action("Groceries", "Home", new { categoryCode = Model.CategoryCode, search = Model.Search, orderPriceFromHighToLow = Model.OrderPriceFromHighToLow, orderPriceFromLowToHigh = Model.OrderPriceFromLowToHigh, orderAlphabetically = Model.OrderAlphabetically })">Stock</a>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6 text-center">
-                                @if (string.IsNullOrWhiteSpace(item.ImageUrl))
-                                {
-                                    <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" />
-                                }
-                                else
-                                {
-                                    <img src="@item.ImageUrl" alt="@item.ImageAlt" />
-                                }
+                                    <div class="col-md-6 text-center">
+                                        @if (string.IsNullOrWhiteSpace(item.ImageUrl))
+                                        {
+                                            <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" />
+                                        }
+                                        else
+                                        {
+                                            <img src="@item.ImageUrl" alt="@item.ImageAlt" />
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        }
         </div>
     }
-}
-else
-{
-    <div class="col-md-12">
+    else
+    {
         <p>There are no items to show.</p>
+    }
     </div>
-}
 </div>

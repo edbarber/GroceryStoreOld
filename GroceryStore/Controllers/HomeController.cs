@@ -55,19 +55,23 @@ namespace GroceryStore.Controllers
                     Groceries = _context.Grocery.Include(g => g.Conversion).Include(g => g.Category)
                 };
 
-                if (!string.IsNullOrWhiteSpace(model.CategoryCode))
-                {
-                    model.Groceries = model.Groceries.Where(g => g.Category.Code == model.CategoryCode);
-                    ViewData["Title"] = (await _context.Category.FirstOrDefaultAsync(c => c.Code == model.CategoryCode)).Name;
-                }
+                bool searchExists = !string.IsNullOrWhiteSpace(model.Search);
 
-                if (!string.IsNullOrWhiteSpace(model.Search))
+                if (searchExists)
                 {
                     model.Groceries = model.Groceries.Where(g => g.Name.Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) ||
                         g.Price.ToString().Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) ||
                         (g.Weight != null ? g.Weight.ToString().Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) : false) ||
                         (g.Conversion != null ? g.Conversion.Code.Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) : false) ||
                         (g.Description != null ? g.Description.Contains(model.Search, StringComparison.CurrentCultureIgnoreCase) : false));
+                }
+
+                model.ValidCategories = model.Groceries.GroupBy(g => g.CategoryId).Select(g => new KeyValuePair<Category, int?>(g.FirstOrDefault().Category, searchExists ? g.Count() : (int?)null)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                  
+                if (!string.IsNullOrWhiteSpace(model.CategoryCode))
+                {
+                    model.Groceries = model.Groceries.Where(g => g.Category.Code == model.CategoryCode);
+                    ViewData["Title"] = (await _context.Category.FirstOrDefaultAsync(c => c.Code == model.CategoryCode)).Name;
                 }
 
                 // there will only be one passed in anyway
@@ -86,7 +90,7 @@ namespace GroceryStore.Controllers
 
                 return View(model);
             }
-            catch 
+            catch
             {
                 return RedirectToAction("Index", "Error");
             }
