@@ -1,11 +1,12 @@
 ﻿using GroceryStore.Data;
+using GroceryStore.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GroceryStore.Models
+namespace GroceryStore.Services
 {
     public class DbCommonFunctionality
     {
