@@ -73,7 +73,8 @@
         <div class="row">
         @foreach (var item in Model.Groceries)
         {
-            <div class="col-md-3">
+            <!-- render all columns on larger screens and one less column on more smaller screens -->
+            <div class="col-lg-4 col-md-6">
                 <div class="thumbnail">
                     <a href="#" data-toggle="modal" data-target="#groceryDetail_@item.GroceryId">
                         <div class="selectable-image">
