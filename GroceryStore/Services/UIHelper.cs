@@ -22,7 +22,7 @@ namespace GroceryStore.Services
             claims.Add(new SelectListItem
             {
                 Value = null,
-                Text = "N/A"
+                Text = "Not applicable"
             });
 
             claims.AddRange(_configuration.GetSection("Claims").GetChildren().Select(c => new SelectListItem

@@ -67,7 +67,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
                     ApplicationRole createdRole = await _roleManager.FindByNameAsync(Input.Role);
 
-                    if (Input.SelectedClaimType != "N/A")  
+                    if (Input.SelectedClaimType != "Not applicable")  
                     {
                         result = await _roleManager.AddClaimAsync(createdRole, new Claim(Input.SelectedClaimType, "true"));
 

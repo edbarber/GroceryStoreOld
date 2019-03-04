@@ -113,15 +113,15 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 Claim oldClaim = (await _roleManager.GetClaimsAsync(role)).FirstOrDefault();
 
                 // don't remove and add same claim
-                if (oldClaim == null && Input.SelectedClaimType != "N/A" || oldClaim != null && Input.SelectedClaimType != oldClaim.Type)
+                if (oldClaim == null && Input.SelectedClaimType != "Not applicable" || oldClaim != null && Input.SelectedClaimType != oldClaim.Type)
                 {
-                    // don't remove a claim that doesn't exist because N/A is not a claim
+                    // don't remove a claim that doesn't exist because not applicable is not a claim
                     if (oldClaim != null)
                     {
                         updateResult = await _roleManager.RemoveClaimAsync(role, oldClaim);
                     }
 
-                    if (Input.SelectedClaimType != "N/A")
+                    if (Input.SelectedClaimType != "Not applicable")
                     {
                         if (updateResult.Succeeded)
                         {
