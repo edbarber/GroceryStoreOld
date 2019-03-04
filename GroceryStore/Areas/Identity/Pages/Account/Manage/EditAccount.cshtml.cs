@@ -15,7 +15,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 {
-    [Authorize(Policy = "Admin")]
+    [Authorize(Policy = "AdminRights")]
     public class EditAccountModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;

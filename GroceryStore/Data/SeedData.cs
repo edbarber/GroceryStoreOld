@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace GroceryStore.Data
 {
@@ -52,6 +53,49 @@ namespace GroceryStore.Data
                 if (result.Succeeded)
                 {
                     logger.LogInformation("Created admin role.");
+                }
+                else
+                {
+                    LogErrors(result.Errors, logger);
+
+                    return;
+                }
+            }
+
+            ApplicationRole createdAdminRole = await roleManager.FindByNameAsync(adminRole);
+            Claim newAdminClaim = new Claim(configuration.GetSection("Claims").GetSection("AdminClaim").GetSection("Identifier").Value, "true"); 
+            Claim existingAdminClaim = (await roleManager.GetClaimsAsync(createdAdminRole)).FirstOrDefault();
+
+            // if existing admin claim is incorrect 
+            if (existingAdminClaim != null)
+            {
+                if (existingAdminClaim.Type != newAdminClaim.Type || existingAdminClaim.Value != newAdminClaim.Value)
+                {
+                    // remove the incorrect admin claim
+                    var result = await roleManager.RemoveClaimAsync(createdAdminRole, existingAdminClaim);
+
+                    if (result.Succeeded)
+                    {
+                        existingAdminClaim = null;  // make sure we add back the correct claim next
+                        logger.LogInformation("Removed incorrect admin claim.");
+                    }
+                    else
+                    {
+                        LogErrors(result.Errors, logger);
+
+                        return;
+                    }
+                }
+            }
+
+            // create and assign the admin claim to the admin role if the admin claim doesn't exist
+            if (existingAdminClaim == null)
+            {
+                var result = await roleManager.AddClaimAsync(createdAdminRole, newAdminClaim);
+
+                if (result.Succeeded)
+                {
+                    logger.LogInformation("Created admin claim.");
                 }
                 else
                 {
