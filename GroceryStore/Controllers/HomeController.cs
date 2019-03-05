@@ -21,33 +21,19 @@ namespace GroceryStore.Controllers
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                List<Category> categories = await _context.Category.Include(c => c.Grocery).Where(c => c.Grocery.Count > 0).ToListAsync();
-                return View(categories);
-            }
-            catch
-            {
-                return RedirectToAction("Index", "Error");
-            }
+            List<Category> categories = await _context.Category.Include(c => c.Grocery).Where(c => c.Grocery.Count > 0).ToListAsync();
+            return View(categories);
         }
 
         public async Task<IActionResult> Stock(int id, string returnURL)
         {
-            try
-            {
-                var stock = _context.Stock.Include(s => s.Location).Include(s => s.Location.ProvinceState).Where(s => s.GroceryId == id);
-                var grocery = await _context.Grocery.FirstOrDefaultAsync(g => g.GroceryId == id);
+            var stock = _context.Stock.Include(s => s.Location).Include(s => s.Location.ProvinceState).Where(s => s.GroceryId == id);
+            var grocery = await _context.Grocery.FirstOrDefaultAsync(g => g.GroceryId == id);
 
-                ViewData["Subtitle"] = grocery.Name;
-                ViewData["ReturnURL"] = returnURL;
+            ViewData["Subtitle"] = grocery.Name;
+            ViewData["ReturnURL"] = returnURL;
 
-                return View(await stock.ToListAsync());
-            }
-            catch
-            {
-                return RedirectToAction("Index", "Error");
-            }
+            return View(await stock.ToListAsync());
         }
 
         public IActionResult About()
@@ -67,12 +53,6 @@ namespace GroceryStore.Controllers
         public IActionResult Privacy()
         {
             return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }
