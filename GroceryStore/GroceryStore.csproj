@@ -11,4 +11,9 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.6" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\dataTables\css\" />
+    <Folder Include="wwwroot\lib\dataTables\js\" />
+  </ItemGroup>
+
 </Project>

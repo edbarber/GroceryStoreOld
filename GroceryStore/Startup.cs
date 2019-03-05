@@ -61,6 +61,8 @@ namespace GroceryStore
             services.AddSingleton(new DbCommonFunctionality(optionsBuilder.Options));
             // -----------------------------------------------------------
 
+            services.AddSingleton(new UIHelper(Configuration));    // inject custom class for common UI components
+
             // Use add identity instead and added add default ui with add default token providers due to bug in 
             // asp.net core 2.1 with checking what role current logged in user belongs to
             services.AddIdentity<ApplicationUser, ApplicationRole>()
@@ -71,11 +73,17 @@ namespace GroceryStore
             services.AddDbContext<GroceryStoreContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("GroceryStoreConnection")));
 
-            // if admin role name changes then changes to role will take affect in authroizing roles
+            var claims = Configuration.GetSection("Claims");
+            var adminClaim = claims.GetSection("AdminClaim");
+            var managerialClaim = claims.GetSection("ManagerialClaim");
+
+            // when creating a new role, the following policies will correspond to a claim that will be assigned to a role
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Admin", policy =>
-                    policy.RequireRole(Configuration.GetSection("AdminRole").Value));
+                options.AddPolicy("AdminRights", policy =>
+                    policy.RequireClaim(adminClaim.GetSection("Identifier").Value, "true"));
+                options.AddPolicy("ManagerialRights", policy =>
+                    policy.RequireClaim(managerialClaim.GetSection("Identifier").Value, "true"));
             });
 
             services.AddMvc()
@@ -98,7 +106,7 @@ namespace GroceryStore
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
 

@@ -11,7 +11,7 @@
     {
         <div class="col-md-3">
             <div class="thumbnail">
-                <a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@item.Code" class="link-disable-underline">
+                <a asp-action="Index" asp-controller="Groceries" asp-route-categoryCode="@item.Code" class="link-disable-underline">
                     @if (string.IsNullOrWhiteSpace(item.ImageUrl))
                     {
                         <img src="~/images/imagenotavailable1-39de324.png" alt="Missing image" />

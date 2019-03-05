@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 {
-    [Authorize(Policy = "Admin")]
+    [Authorize(Policy = "AdminRights")]
     public class AccountsModel : PageModel
     {
         private readonly ApplicationDbContext _context;

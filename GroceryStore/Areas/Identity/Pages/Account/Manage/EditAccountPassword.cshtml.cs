@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 {
-    [Authorize(Policy = "Admin")]
+    [Authorize(Policy = "AdminRights")]
     public class EditAccountPasswordModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -98,7 +98,14 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             _logger.LogInformation($"Admin changed user {id} password successfully.");
             StatusMessage = "Password has been changed";
 
-            return Redirect(returnURL ?? "./Accounts");
+            if (string.IsNullOrWhiteSpace(returnURL))
+            {
+                return RedirectToPage("Accounts");
+            }
+            else
+            {
+                return Redirect(returnURL);
+            }
         }
     }
 }

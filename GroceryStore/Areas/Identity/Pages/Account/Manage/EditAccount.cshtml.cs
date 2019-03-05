@@ -15,7 +15,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 {
-    [Authorize(Policy = "Admin")]
+    [Authorize(Policy = "AdminRights")]
     public class EditAccountModel : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -181,7 +181,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
                 if (!result.Succeeded)
                 {
                     StatusMessage = $"Error: Profile has been updated, however, the role wasn't updated. Please try editing the role for this user again.";
-                    return RedirectToPage("./EditAccount", new { id = user.Id });
+                    return RedirectToPage("EditAccount", new { id = user.Id });
                 }
                 else
                 {
@@ -204,13 +204,13 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
             if (roleError != string.Empty || !result.Succeeded)
             {
                 StatusMessage = $"Error: {roleError} Profile has been updated, however, the role doesn't exist anymore. Please try updating the role for this user.";
-                return RedirectToPage("./EditAccount", new { id = user.Id });
+                return RedirectToPage("EditAccount", new { id = user.Id });
             }
             else
             {
                 StatusMessage = $"Profile {user.UserName} has been updated successfully!";
                 await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
-                return RedirectToPage("./Accounts");
+                return RedirectToPage("Accounts");
             }
         }
     }

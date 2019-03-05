@@ -46,7 +46,7 @@
         <button class="btn btn-default" onclick="expandAll()">Expand All</button>
         <button class="btn btn-default" onclick="collapseAll()">Collapse All</button>
         <div class="pull-right form-group">
-            <a asp-page="./AddRole" class="btn btn-default">Add Role</a>
+            <a asp-page="AddRole" class="btn btn-default">Add Role</a>
         </div>
     </div>
 </div>
@@ -57,6 +57,14 @@
         {
             <div class="panel-heading details-control"><span class="details-control-open"></span>@item.Role.Name</div>
             <div class="panel-body">
+                @if (!string.IsNullOrWhiteSpace(item.ClaimMeaning))
+                {
+                    <dl class="dl-horizontal">
+                        <dt>Permission</dt>
+                        <dd>@item.ClaimMeaning</dd>
+                    </dl>
+                }
+
                 @if (item.Users.Count > 0)
                 {
                     <dl class="dl-horizontal d-inline-block">
@@ -69,7 +77,9 @@
                 }
                 else
                 {
-                    <text>There are no users to show</text>
+                    <dl class="dl-horizontal d-inline-block">
+                        <dd>There are no users to show</dd>
+                    </dl>
                 }
                 <div class="pull-right">
                     @if (item.AllowEditAndDelete)
