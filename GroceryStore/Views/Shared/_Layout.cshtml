@@ -55,7 +55,7 @@
             </div>
             <div class="navbar-collapse collapse">
                 <partial name="_LoginPartial" />
-                <form asp-action="Groceries" class="navbar-form navbar-right" asp-controller="Home" method="get" id="searchGroceries">
+                <form asp-action="Index" class="navbar-form navbar-right" asp-controller="Groceries" method="get" id="searchGroceries">
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="Search" name="search" id="search" value="@Context.Session.GetString("Search")">
                         <div class="input-group-btn">

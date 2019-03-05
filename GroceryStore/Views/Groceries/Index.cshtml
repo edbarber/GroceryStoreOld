@@ -1,4 +1,4 @@
-﻿@model GroceryStore.Models.HomeViewModels.GroceriesViewModel
+﻿@model GroceryStore.Models.GroceryViewModels.GroceriesViewModel
 @{
     if (string.IsNullOrWhiteSpace(ViewData["Title"]?.ToString()))
     {
@@ -17,7 +17,7 @@
         <div class="col-md-12">
             @if (Model.Category != null)
             {
-                <p><span class="font-weight-bold">Search Results</span> for <span class="highlight font-weight-bold">@Model.Search</span> and <span class="badge">@Model.Category.Name <a asp-action="Groceries" asp-controller="Home" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="@Model.OrderPriceFromLowToHigh" asp-route-orderPriceFromHighToLow="@Model.OrderPriceFromHighToLow" asp-route-orderAlphabetically="@Model.OrderAlphabetically"><i class="fas fa-times-circle"></i></a></span></p>
+                <p><span class="font-weight-bold">Search Results</span> for <span class="highlight font-weight-bold">@Model.Search</span> and <span class="badge">@Model.Category.Name <a asp-action="Index" asp-controller="Groceries" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="@Model.OrderPriceFromLowToHigh" asp-route-orderPriceFromHighToLow="@Model.OrderPriceFromHighToLow" asp-route-orderAlphabetically="@Model.OrderAlphabetically"><i class="fas fa-times-circle"></i></a></span></p>
             }
             else
             {
@@ -28,9 +28,9 @@
             {
                 <ul class="list-inline">
                     <li class="font-weight-bold">Order By</li>
-                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.Category?.Code" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="true">Price (Low to High)</a></li>
-                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.Category?.Code" asp-route-search="@Model.Search" asp-route-orderPriceFromHighToLow="true">Price (High to Low)</a></li>
-                    <li><a asp-action="Groceries" asp-controller="Home" asp-route-categoryCode="@Model.Category?.Code" asp-route-search="@Model.Search" asp-route-orderAlphabetically="true">A-Z (alphabetical)</a></li>
+                    <li><a asp-action="Index" asp-controller="Groceries" asp-route-categoryCode="@Model.Category?.Code" asp-route-search="@Model.Search" asp-route-orderPriceFromLowToHigh="true">Price (Low to High)</a></li>
+                    <li><a asp-action="Index" asp-controller="Groceries" asp-route-categoryCode="@Model.Category?.Code" asp-route-search="@Model.Search" asp-route-orderPriceFromHighToLow="true">Price (High to Low)</a></li>
+                    <li><a asp-action="Index" asp-controller="Groceries" asp-route-categoryCode="@Model.Category?.Code" asp-route-search="@Model.Search" asp-route-orderAlphabetically="true">A-Z (alphabetical)</a></li>
                 </ul>
             }
         </div>
@@ -49,7 +49,7 @@
                     <ul class="list-unstyled">
                     @foreach (var item in Model.ValidCategories)
                     {
-                        string categoryUrl = Url.Action("Groceries", "Home", new { categoryCode = item.Key.Code, search = Model.Search, orderPriceFromHighToLow = Model.OrderPriceFromHighToLow, orderPriceFromLowToHigh = Model.OrderPriceFromLowToHigh, orderAlphabetically = Model.OrderAlphabetically });
+                        string categoryUrl = Url.Action("Index", "Groceries", new { categoryCode = item.Key.Code, search = Model.Search, orderPriceFromHighToLow = Model.OrderPriceFromHighToLow, orderPriceFromLowToHigh = Model.OrderPriceFromLowToHigh, orderAlphabetically = Model.OrderAlphabetically });
 
                         if (item.Value != null)
                         {
