@@ -57,6 +57,14 @@
         {
             <div class="panel-heading details-control"><span class="details-control-open"></span>@item.Role.Name</div>
             <div class="panel-body">
+                @if (!string.IsNullOrWhiteSpace(item.ClaimMeaning))
+                {
+                    <dl class="dl-horizontal">
+                        <dt>Permission</dt>
+                        <dd>@item.ClaimMeaning</dd>
+                    </dl>
+                }
+
                 @if (item.Users.Count > 0)
                 {
                     <dl class="dl-horizontal d-inline-block">
@@ -69,7 +77,9 @@
                 }
                 else
                 {
-                    <text>There are no users to show</text>
+                    <dl class="dl-horizontal d-inline-block">
+                        <dd>There are no users to show</dd>
+                    </dl>
                 }
                 <div class="pull-right">
                     @if (item.AllowEditAndDelete)

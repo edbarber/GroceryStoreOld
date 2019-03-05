@@ -48,12 +48,13 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
         public class OutputModel
         {
+            public string ClaimMeaning { get; set; }
             public ApplicationRole Role { get; set; }
             public bool AllowEditAndDelete { get; set; }
             public List<ApplicationUser> Users { get; set; }
         }
 
-        public IActionResult OnGet(string searchRole, string searchUser)
+        public async Task<IActionResult> OnGetAsync(string searchRole, string searchUser)
         {
             List<OutputModel> output = new List<OutputModel>();
             List<ApplicationRole> roles = _roleManager.Roles.OrderBy(ar => ar.Name).ToList();
@@ -68,13 +69,27 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 
             foreach (ApplicationRole currRole in roles)
             {
+                string currRoleClaimType = (await _roleManager.GetClaimsAsync(currRole)).FirstOrDefault()?.Type;
+                string claimMeaning = string.Empty;
+
+                IEnumerable<IConfigurationSection> possibleClaims = _configuration.GetSection("Claims").GetChildren();
+
+                foreach (IConfigurationSection section in possibleClaims)
+                {
+                    if (section.GetChildren().FirstOrDefault(c => c.Key == "Identifier").Value == currRoleClaimType)
+                    {
+                        claimMeaning = section.GetChildren().FirstOrDefault(c => c.Key == "Meaning").Value;
+                    }
+                }
+
                 OutputModel outputModel = new OutputModel
                 {
                     Role = currRole,
                     // admin should not be able to delete the admin role (this is needed to keep the integrity of the account database) 
                     // set it here so we can disable button on front end if this is false
                     AllowEditAndDelete = currRole.Name != _configuration.GetSection("AdminRole").Value,
-                    Users = _dbCommonFunctionality.GetUsersByRoleId(currRole.Id)
+                    Users = _dbCommonFunctionality.GetUsersByRoleId(currRole.Id),
+                    ClaimMeaning = claimMeaning
                 };
 
                 if (!string.IsNullOrWhiteSpace(SearchUser))
