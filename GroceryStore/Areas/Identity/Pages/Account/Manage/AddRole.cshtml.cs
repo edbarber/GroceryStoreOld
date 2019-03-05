@@ -21,7 +21,7 @@ namespace GroceryStore.Areas.Identity.Pages.Account.Manage
         private readonly ILogger<AddAccountModel> _logger;
         private readonly UIHelper _uiHelper;
 
-        public AddRoleModel(RoleManager<ApplicationRole> roleManager, ILogger<AddAccountModel> logger, DbCommonFunctionality dbCommonFunctionality, UIHelper uiHelper)
+        public AddRoleModel(RoleManager<ApplicationRole> roleManager, ILogger<AddAccountModel> logger, UIHelper uiHelper)
         {
             _roleManager = roleManager;
             _logger = logger;
