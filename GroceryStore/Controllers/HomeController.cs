@@ -30,6 +30,11 @@ namespace GroceryStore.Controllers
             var stock = _context.Stock.Include(s => s.Location).Include(s => s.Location.ProvinceState).Where(s => s.GroceryId == id);
             var grocery = await _context.Grocery.FirstOrDefaultAsync(g => g.GroceryId == id);
 
+            if (grocery == null)
+            {
+                return NotFound();
+            }
+
             ViewData["Subtitle"] = grocery.Name;
             ViewData["ReturnURL"] = returnURL;
 

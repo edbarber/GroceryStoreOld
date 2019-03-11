@@ -1,0 +1,7 @@
+﻿@model GroceryStore.Models.ErrorViewModels.ErrorCodeViewModel
+@{
+    ViewData["Title"] = $"{Model.ErrorCode} Error";
+}
+
+<h2 class="text-danger">@Model.ErrorCode Error</h2>
+<p>@Model.ErrorDescription</p>

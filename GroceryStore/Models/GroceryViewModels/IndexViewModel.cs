@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace GroceryStore.Models.GroceryViewModels
 {
-    public class GroceriesViewModel
+    public class IndexViewModel
     {
         public Category Category { get; set; }
         public string Search { get; set; }

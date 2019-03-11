@@ -110,6 +110,7 @@ namespace GroceryStore
                 app.UseHsts();
             }
 
+            app.UseStatusCodePagesWithReExecute("/Error/ErrorCode");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
