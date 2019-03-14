@@ -31,7 +31,7 @@ namespace GroceryStore.Controllers
 
             categoryCode = categoryCode?.Trim();
 
-            GroceriesViewModel model = new GroceriesViewModel
+            IndexViewModel model = new IndexViewModel
             {
                 Search = search?.Trim(),
                 Category = await _context.Category.FirstOrDefaultAsync(c => c.Code == categoryCode),

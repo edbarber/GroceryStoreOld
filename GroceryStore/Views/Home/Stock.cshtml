@@ -29,6 +29,11 @@
             </dd>
         </dl>
     }
+
+    @if (!Model.Any())
+    {
+        <p>There is no stock of this item.</p>
+    }
 </div>
 <div>
     <a href="@ViewData["ReturnURL"]">Back to List</a>
