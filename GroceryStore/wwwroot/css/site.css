@@ -110,6 +110,10 @@ span.details-control-collapsed::before {
     display: inline-block;  /* displays as an inline block element */
 }
 
+.d-block {
+    display: block; /* displays as a block element */
+}
+
 .vertical-align-to-control {
     margin-top: 25px;   /* align it so that it lines up vertically with a control on the left or right if label is over control in bootstrap */
 }

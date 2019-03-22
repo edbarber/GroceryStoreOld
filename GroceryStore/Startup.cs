@@ -17,17 +17,21 @@ using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
 using GroceryStore.Areas.Identity.Pages.Account;
 using GroceryStore.Services;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace GroceryStore
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
             Configuration = configuration;
+            HostingEnvironment = hostingEnvironment;
         }
 
         public IConfiguration Configuration { get; }
+        public IHostingEnvironment HostingEnvironment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -62,6 +66,7 @@ namespace GroceryStore
             // -----------------------------------------------------------
 
             services.AddSingleton(new UIHelper(Configuration));    // inject custom class for common UI components
+            services.AddSingleton(new FileUtility(Configuration, HostingEnvironment));  // inject custom class for managing files
 
             // Use add identity instead and added add default ui with add default token providers due to bug in 
             // asp.net core 2.1 with checking what role current logged in user belongs to
@@ -113,6 +118,22 @@ namespace GroceryStore
             app.UseStatusCodePagesWithReExecute("/Error/ErrorCode");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            // if the uploads folder doesn't exist, then create it
+            // ------------------------------------------------------------------
+            string uploads = Configuration.GetSection("UploadLocation").Value;
+            string fileRootPath = Path.Combine(env.ContentRootPath, uploads);
+
+            Directory.CreateDirectory(fileRootPath);
+            // ------------------------------------------------------------------
+
+            // used to host files from the server 
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(fileRootPath),
+                RequestPath = new PathString($"/{uploads}")
+            });
+
             app.UseCookiePolicy();
 
             app.UseAuthentication();

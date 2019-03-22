@@ -1,4 +1,7 @@
 ﻿@using GroceryStore
 @using GroceryStore.Models
 @using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Authorization
+@using GroceryStore.Services
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject IAuthorizationService AuthorizationService

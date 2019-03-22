@@ -6,15 +6,16 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using GroceryStore.Models;
 using GroceryStore.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace GroceryStore.Areas.Identity.Pages.Account.Manage
 {
+    [Authorize(Policy = "AdminRights")]
     public class AddRoleModel : PageModel
     {
         private readonly RoleManager<ApplicationRole> _roleManager;

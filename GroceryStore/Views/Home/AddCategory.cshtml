@@ -1,0 +1,51 @@
+﻿@model GroceryStore.Models.HomeViewModels.CategoryViewModel
+
+@{
+    ViewData["Title"] = "Add Category";
+}
+
+<h2>Add Category</h2>
+
+<h4>Category</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddCategory" asp-controller="Home" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Category.Name" class="control-label"></label>
+                <input asp-for="Category.Name" class="form-control" />
+                <span asp-validation-for="Category.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Category.Code" class="control-label"></label>
+                <input asp-for="Category.Code" class="form-control" />
+                <span asp-validation-for="Category.Code" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Image" class="control-label"></label>
+                <a href="#" data-toggle="tooltip" title="It is strongly recommended to upload in 640x640 to preserve aspect ratio."><i class="fas fa-info-circle"></i></a>
+                <p>Files that are not in 640x640 will be scaled. All images must have a maximum size of @FileUtility.MaxImageSizeInBinaryMegabytes MBs.</p>
+                <input type="file" asp-for="Image" accept="image/*" />
+                <p>@FileUtility.GetSupportedImageTypesAsString() supported.</p>
+                <span asp-validation-for="Image" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Category.ImageAlt" class="control-label"></label>
+                <input asp-for="Category.ImageAlt" class="form-control" />
+                <span asp-validation-for="Category.ImageAlt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

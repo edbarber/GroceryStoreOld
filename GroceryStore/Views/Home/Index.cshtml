@@ -3,7 +3,13 @@
     ViewData["Title"] = "Categories";
 }
 
-<h2>Categories</h2>
+<h2>Categories
+@if ((await AuthorizationService.AuthorizeAsync(User, "ManagerialRights")).Succeeded)
+{
+    <a asp-action="AddCategory" asp-controller="Home" class="btn btn-default pull-right">Add Category</a>
+}
+</h2>
+<partial name="_StatusMessage" model="@TempData["StatusMessage"]" />
 <div class="row">
 @if (Model.Count() > 0)
 {
