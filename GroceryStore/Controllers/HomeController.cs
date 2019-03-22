@@ -26,7 +26,7 @@ namespace GroceryStore.Controllers
 
         public async Task<IActionResult> Index()
         {
-            List<Category> categories = await _context.Category.Include(c => c.Grocery)/*.Where(c => c.Grocery.Count > 0)*/.ToListAsync();
+            List<Category> categories = await _context.Category.Include(c => c.Grocery).Where(c => c.Grocery.Count > 0).ToListAsync();
             return View(categories);
         }
 
